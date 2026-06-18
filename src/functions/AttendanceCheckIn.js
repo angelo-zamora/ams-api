@@ -1,34 +1,6 @@
 const { app } = require('@azure/functions');
-const fs = require('fs').promises;
-const path = require('path');
 const { validateToken, getBearerToken } = require('../utils/auth');
-
-const DB_FILE_PATH = path.join(__dirname, '..', '..', 'attendance.json');
-
-/**
- * Reads all attendance records from the local file database
- * @returns {Promise<Array>} List of attendance records
- */
-async function readRecords() {
-    try {
-        const data = await fs.readFile(DB_FILE_PATH, 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        // If file does not exist, return an empty array
-        if (error.code === 'ENOENT') {
-            return [];
-        }
-        throw error;
-    }
-}
-
-/**
- * Writes all attendance records to the local file database
- * @param {Array} records - List of records to write
- */
-async function writeRecords(records) {
-    await fs.writeFile(DB_FILE_PATH, JSON.stringify(records, null, 2), 'utf8');
-}
+const { attendanceService } = require('../utils/container');
 
 app.http('AttendanceCheckIn', {
     methods: ['GET', 'POST'],
@@ -36,56 +8,55 @@ app.http('AttendanceCheckIn', {
     handler: async (request, context) => {
         context.log(`Http function processed request for url "${request.url}"`);
 
-        // 1. Extract Bearer token from header
-        const token = getBearerToken(request);
-        if (!token) {
-            return {
-                status: 401,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    error: 'Unauthorized', 
-                    message: 'Missing or invalid Authorization header. Expected format: Bearer <Token>.' 
-                })
-            };
-        }
+        // 1. Extract Bearer token from header (Commented out for development)
+        // const token = getBearerToken(request);
+        // if (!token) {
+        //     return {
+        //         status: 401,
+        //         headers: { 'Content-Type': 'application/json' },
+        //         body: JSON.stringify({ 
+        //             error: 'Unauthorized', 
+        //             message: 'Missing or invalid Authorization header. Expected format: Bearer <Token>.' 
+        //         })
+        //     };
+        // }
 
-        // 2. Validate token against Microsoft Entra configuration
+        // 2. Validate token against Microsoft Entra configuration (Commented out for development)
         let decodedToken;
-        try {
-            decodedToken = await validateToken(token);
-        } catch (error) {
-            context.error(`Authentication validation failed: ${error.message}`);
-            return {
-                status: 401,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    error: 'Unauthorized', 
-                    message: `Token validation failed: ${error.message}` 
-                })
-            };
-        }
+        // try {
+        //     decodedToken = await validateToken(token);
+        // } catch (error) {
+        //     context.error(`Authentication validation failed: ${error.message}`);
+        //     return {
+        //         status: 401,
+        //         headers: { 'Content-Type': 'application/json' },
+        //         body: JSON.stringify({ 
+        //             error: 'Unauthorized', 
+        //             message: `Token validation failed: ${error.message}` 
+        //         })
+        //     };
+        // }
 
         // 3. Extract identity details from claims
-        const userId = decodedToken.oid || decodedToken.sub;
-        const userName = decodedToken.name || 'Unknown User';
-        const userEmail = decodedToken.preferred_username || decodedToken.unique_name || decodedToken.upn || '';
+        const userId   = (decodedToken && (decodedToken.oid || decodedToken.sub)) || 'mock-user-id';
+        const userName  = (decodedToken && decodedToken.name)                       || 'Mock User';
+        const userEmail = (decodedToken && (decodedToken.preferred_username || decodedToken.unique_name || decodedToken.upn)) || 'mock.user@example.com';
 
         // 4. Handle HTTP GET: Retrieve attendance history for the authenticated user
         if (request.method === 'GET') {
             try {
-                const records = await readRecords();
-                const userRecords = records.filter(record => record.userId === userId);
-                
+                const records = await attendanceService.getHistory(userId);
+
                 return {
                     status: 200,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         user: { id: userId, name: userName, email: userEmail },
-                        records: userRecords
+                        records
                     })
                 };
             } catch (error) {
-                context.error(`Failed to read records: ${error.message}`);
+                context.error(`Failed to fetch attendance records: ${error.message}`);
                 return {
                     status: 500,
                     headers: { 'Content-Type': 'application/json' },
@@ -99,68 +70,52 @@ app.http('AttendanceCheckIn', {
 
         // 5. Handle HTTP POST: Save new attendance record
         if (request.method === 'POST') {
+            // Parse and validate request body
+            let requestBody;
             try {
-                let requestBody;
-                try {
-                    requestBody = await request.json();
-                } catch (e) {
-                    return {
-                        status: 400,
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            error: 'Bad Request', 
-                            message: 'Request body must be a valid JSON.' 
-                        })
-                    };
-                }
+                requestBody = await request.json();
+            } catch (e) {
+                return {
+                    status: 400,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        error: 'Bad Request', 
+                        message: 'Request body must be valid JSON.' 
+                    })
+                };
+            }
 
-                const { type, location, notes } = requestBody;
+            const { type, location, notes } = requestBody;
 
-                // Validate request data
-                if (!type || (type !== 'check-in' && type !== 'check-out')) {
-                    return {
-                        status: 400,
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            error: 'Bad Request', 
-                            message: "Field 'type' is required and must be either 'check-in' or 'check-out'." 
-                        })
-                    };
-                }
-
-                // Construct new check-in/out record
-                const newRecord = {
-                    id: Date.now().toString() + Math.random().toString(36).substring(2, 7),
+            try {
+                const record = await attendanceService.recordAttendance({
                     userId,
                     userName,
                     userEmail,
-                    timestamp: new Date().toISOString(),
                     type,
-                    location: location || 'Not Specified',
-                    notes: notes || ''
-                };
-
-                // Read, append, and save
-                const records = await readRecords();
-                records.push(newRecord);
-                await writeRecords(records);
+                    location,
+                    notes,
+                });
 
                 return {
                     status: 201,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: 'Attendance successfully recorded.',
-                        record: newRecord
+                        record
                     })
                 };
             } catch (error) {
-                context.error(`Failed to save record: ${error.message}`);
+                context.error(`Failed to record attendance: ${error.message}`);
+
+                // Business validation errors (e.g. invalid type) should surface as 400
+                const isValidationError = error.message.includes("'type'") || error.message.includes("identity");
                 return {
-                    status: 500,
+                    status: isValidationError ? 400 : 500,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
-                        error: 'Internal Server Error', 
-                        message: 'Could not record attendance.' 
+                        error: isValidationError ? 'Bad Request' : 'Internal Server Error', 
+                        message: error.message 
                     })
                 };
             }
