@@ -1,6 +1,6 @@
 const { app } = require('@azure/functions');
 const { validateToken, getBearerToken } = require('../utils/auth');
-const { attendanceService } = require('../utils/container');
+const { attendanceService, employeeService } = require('../utils/container');
 
 app.http('AttendanceCheckIn', {
     methods: ['GET', 'POST'],
@@ -38,12 +38,35 @@ app.http('AttendanceCheckIn', {
         // }
 
         // 3. Extract identity details from claims
-        const userId   = (decodedToken && (decodedToken.oid || decodedToken.sub)) || 'mock-user-id';
-        const userName  = (decodedToken && decodedToken.name)                       || 'Mock User';
-        const userEmail = (decodedToken && (decodedToken.preferred_username || decodedToken.unique_name || decodedToken.upn)) || 'mock.user@example.com';
+        // const userId   = (decodedToken && (decodedToken.oid || decodedToken.sub)) || 'mock-user-id';
+        // const userName  = (decodedToken && decodedToken.name)                       || 'Mock User';
+        // const userEmail = (decodedToken && (decodedToken.preferred_username || decodedToken.unique_name || decodedToken.upn)) || 'mock.user@example.com';
 
         // 4. Handle HTTP GET: Retrieve attendance history for the authenticated user
         if (request.method === 'GET') {
+            const employeeId = request.query.get('employeeId');
+
+            if (!employeeId) {
+                return {
+                    status: 400,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ error: 'Bad Request', message: "'employeeId' query parameter is required." })
+                };
+            }
+
+            const employee = await employeeService.getEmployeeByEmployeeId(employeeId);
+            if (!employee) {
+                return {
+                    status: 404,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ error: 'Not Found', message: `Employee '${employeeId}' not found or inactive.` })
+                };
+            }
+
+            const userId    = employee.employeeId;
+            const userName  = `${employee.firstName} ${employee.lastName}`;
+            const userEmail = employee.email;
+
             try {
                 const records = await attendanceService.getHistory(userId);
 
@@ -86,8 +109,53 @@ app.http('AttendanceCheckIn', {
             }
 
             const { type, location, notes } = requestBody;
+            // Accept both camelCase (employeeId) and lowercase (employeeid)
+            const employeeId = requestBody.employeeId || requestBody.employeeid || requestBody.employee_id;
+
+            // Step 2: Validate employeeId is provided
+            if (!employeeId) {
+                return {
+                    status: 400,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ error: 'Bad Request', message: "'employeeId' is required." })
+                };
+            }
+
+            // Step 3: Look up the employee in the database
+            const employee = await employeeService.getEmployeeByEmployeeId(employeeId);
+            if (!employee) {
+                return {
+                    status: 404,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ error: 'Not Found', message: `Employee '${employeeId}' not found or inactive.` })
+                };
+            }
+
+            const userId    = employee.employeeId;
+            const userName  = `${employee.firstName} ${employee.lastName}`;
+            const userEmail = employee.email;
 
             try {
+                // Step 4: Check if a record of this type already exists today
+                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+                const existingRecords = await attendanceService.getHistory(userId);
+
+                const alreadyRecorded = existingRecords.some(record =>
+                    new Date(record.timestamp).toISOString().startsWith(today) && record.type === type
+                );
+
+                if (alreadyRecorded) {
+                    return {
+                        status: 409,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            error: 'Conflict', 
+                            message: `You have already recorded '${type}' for today.` 
+                        })
+                    };
+                }
+
+                // Step 5: Record the attendance
                 const record = await attendanceService.recordAttendance({
                     userId,
                     userName,
@@ -120,5 +188,6 @@ app.http('AttendanceCheckIn', {
                 };
             }
         }
+
     }
 });

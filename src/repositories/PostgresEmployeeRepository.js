@@ -39,6 +39,17 @@ class PostgresEmployeeRepository extends IEmployeeRepository {
         const { rows } = await this.db.query(queryText, queryParams);
         return rows;
     }
+
+    async findByEmployeeId(employeeId) {
+        const query = `
+            SELECT id, employee_id AS "employeeId", first_name AS "firstName", last_name AS "lastName",
+                   department, role, status, office, email
+            FROM employees
+            WHERE employee_id = $1
+            AND status = 'active'
+        `;
+        return (await this.db.query(query, [employeeId])).rows[0] || null;
+    }
 }
 
 module.exports = PostgresEmployeeRepository;

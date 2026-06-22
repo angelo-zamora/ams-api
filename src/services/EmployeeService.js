@@ -17,6 +17,10 @@ class EmployeeService {
     async getEmployees(filters = {}) {
         return this.employeeRepository.find(filters);
     }
+
+    async getEmployeeByEmployeeId(employeeId) {
+        return this.employeeRepository.findByEmployeeId(employeeId);
+    }
 }
 
 module.exports = EmployeeService;

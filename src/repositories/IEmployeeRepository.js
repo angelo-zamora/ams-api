@@ -19,6 +19,10 @@ class IEmployeeRepository {
     async find(filters) {
         throw new Error("Method 'find()' must be implemented.");
     }
+
+    async findByEmployeeId(employeeId) {
+        throw new Error("Method 'findByEmployeeId()' must be implemented.");
+    }
 }
 
 module.exports = IEmployeeRepository;
