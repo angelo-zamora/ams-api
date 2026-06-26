@@ -1,6 +1,7 @@
 const { app } = require('@azure/functions');
 const { validateToken, getBearerToken } = require('../utils/auth');
 const { attendanceService } = require('../utils/container');
+const { sendMail } = require('../utils/msGraph');
 
 app.http('AttendanceCheckIn', {
     methods: ['GET', 'POST'],
@@ -40,7 +41,7 @@ app.http('AttendanceCheckIn', {
         // 3. Extract identity details from claims
         const userId   = (decodedToken && (decodedToken.oid || decodedToken.sub)) || 'mock-user-id';
         const userName  = (decodedToken && decodedToken.name)                       || 'Mock User';
-        const userEmail = (decodedToken && (decodedToken.preferred_username || decodedToken.unique_name || decodedToken.upn)) || 'mock.user@example.com';
+        const userEmail = (decodedToken && (decodedToken.preferred_username || decodedToken.unique_name || decodedToken.upn)) || 'angelo.zamora@cress-m.com';
 
         // 4. Handle HTTP GET: Retrieve attendance history for the authenticated user
         if (request.method === 'GET') {
@@ -96,6 +97,30 @@ app.http('AttendanceCheckIn', {
                     location,
                     notes,
                 });
+
+                // Send notification email on check-in only
+                if (record.type === 'check-in') {
+                    try {
+                        const subject = `Clock-in: ${userName} at ${new Date(record.timestamp).toLocaleString()}`;
+                        const bodyHtml = `<p>${userName} (${userEmail}) checked in at <strong>${record.timestamp}</strong>.</p>` +
+                            `<p>Location: ${record.location}</p>` +
+                            (record.notes ? `<p>Notes: ${record.notes}</p>` : '');
+
+                        // sendMail expects (toRecipients[], subject, htmlBody)
+                        const toRecipients = [];
+                        if (userEmail) toRecipients.push(userEmail);
+                        if (process.env.MS_USER_EMAIL && !toRecipients.includes(process.env.MS_USER_EMAIL)) {
+                            toRecipients.push(process.env.MS_USER_EMAIL);
+                        }
+
+                        if (toRecipients.length > 0) {
+                            await sendMail(toRecipients, subject, bodyHtml);
+                        }
+                    } catch (mailErr) {
+                        context.error(`Failed to send clock-in email: ${mailErr.message}`);
+                        // Do not fail the attendance recording because of email failure
+                    }
+                }
 
                 return {
                     status: 201,
