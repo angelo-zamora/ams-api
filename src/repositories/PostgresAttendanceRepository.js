@@ -57,7 +57,7 @@ class PostgresAttendanceRepository extends IAttendanceRepository {
             const userId = row.USERNO ? row.USERNO.trim() : '';
 
             if (row.STARTHOUR && row.STARTMIN) {
-                const checkInTime = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(row.STARTHOUR), parseInt(row.STARTMIN), 0)).toISOString();
+                const checkInTime = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(row.STARTHOUR), parseInt(row.STARTMIN), 0).toISOString();
                 mappedRecords.push({
                     id: `${userId}-${row.DATE_}-in`,
                     userId,
@@ -71,7 +71,7 @@ class PostgresAttendanceRepository extends IAttendanceRepository {
             }
 
             if (row.ENDHOUR && row.ENDMIN) {
-                const checkOutTime = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(row.ENDHOUR), parseInt(row.ENDMIN), 0)).toISOString();
+                const checkOutTime = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(row.ENDHOUR), parseInt(row.ENDMIN), 0).toISOString();
                 mappedRecords.push({
                     id: `${userId}-${row.DATE_}-out`,
                     userId,
@@ -92,15 +92,18 @@ class PostgresAttendanceRepository extends IAttendanceRepository {
 
     async create(record) {
         const dateObj = new Date(record.timestamp);
-        const year = dateObj.getUTCFullYear();
-        const month = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(dateObj.getUTCDate()).padStart(2, '0');
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
         const dateStr = `${year}${month}${day}`;
         
-        const hour = String(dateObj.getUTCHours()).padStart(2, '0');
-        const min = String(dateObj.getUTCMinutes()).padStart(2, '0');
-        const sec = String(dateObj.getUTCSeconds()).padStart(2, '0');
-        const udtDateStr = `${year}${month}${day}${hour}${min}${sec}`;
+        const hour = dateObj.getHours();
+        const min = dateObj.getMinutes();
+        
+        const udtHour = String(hour).padStart(2, '0');
+        const udtMin = String(min).padStart(2, '0');
+        const udtSec = String(dateObj.getSeconds()).padStart(2, '0');
+        const udtDateStr = `${year}${month}${day}${udtHour}${udtMin}${udtSec}`;
         
         const userNo = String(record.userId).trim();
         const udtUser = (record.userName || record.userId).substring(0, 100);
