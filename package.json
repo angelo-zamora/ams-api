@@ -8,8 +8,10 @@
   },
   "dependencies": {
     "@azure/functions": "^4.0.0",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
     "jsonwebtoken": "^9.0.3",
-    "jwks-rsa": "^4.0.1"
+    "jwks-rsa": "^4.0.1",
+    "oracledb": "^6.5.0"
   },
-  "main": "src/{index.js,functions/*.js}"
+  "main": "src/{index.js,functions/**/*.js}"
 }
