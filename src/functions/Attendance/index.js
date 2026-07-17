@@ -3,7 +3,7 @@ const auth = require("../../middleware/AuthenticationMiddleware");
 const attendance = require("../../controllers/AttendanceController");
 const response = require("../../helpers/ResponseHelper");
 
-app.http("getAttendanceToday", {
+app.http("GetAttendanceToday", {
 
     methods: ["GET"],
 
