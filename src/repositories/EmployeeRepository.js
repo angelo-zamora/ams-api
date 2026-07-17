@@ -4,7 +4,7 @@
  * ============================================
  */
 
-const db = require("../../database/DatabaseFactory");
+const db = require("../database/DatabaseFactory");
 
 class EmployeeRepository {
 

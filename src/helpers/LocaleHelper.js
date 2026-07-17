@@ -10,7 +10,7 @@ class LocaleHelper {
         this.supportedLocales = ["en", "ja"];
         this.messages = {
             en: {
-                CLOCK_IN_COMPLETED: "Time clock entry complete.",
+                CLOCK_IN_COMPLETED: "Clock In completed.",
                 CLOCK_OUT_COMPLETED: "Clock Out completed.",
                 ALREADY_CLOCKED_IN_TODAY: "Already clocked in today.",
                 ALREADY_CLOCKED_IN: "Already clocked in.",
@@ -18,6 +18,7 @@ class LocaleHelper {
                 NO_CLOCK_IN_FOUND: "No Clock In found.",
                 CLOCK_IN_RECORD_NOT_FOUND: "Clock In record not found.",
                 EMPLOYEE_NOT_FOUND: "Employee not found.",
+                CLOCK_IN_FAILED: "Clock In failed.",
                 MISSING_AUTHORIZATION_HEADER: "Missing Authorization Header",
                 INVALID_AUTHORIZATION_HEADER: "Invalid Authorization Header",
                 UNAUTHORIZED: "Unauthorized",
@@ -32,6 +33,7 @@ class LocaleHelper {
                 NO_CLOCK_IN_FOUND: "出勤記録が見つかりません。",
                 CLOCK_IN_RECORD_NOT_FOUND: "出勤記録が見つかりません。",
                 EMPLOYEE_NOT_FOUND: "従業員が見つかりません。",
+                CLOCK_IN_FAILED: "打刻に失敗しました。",
                 MISSING_AUTHORIZATION_HEADER: "認証ヘッダーがありません",
                 INVALID_AUTHORIZATION_HEADER: "認証ヘッダーが無効です",
                 UNAUTHORIZED: "認証が必要です",

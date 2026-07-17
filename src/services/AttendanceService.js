@@ -1,9 +1,9 @@
-const attendanceRepository = require("../repositories/mysql/AttendanceRepository");
+const attendanceRepository = require("../repositories/AttendanceRepository");
 const employeeService = require("./EmployeeService");
-const mailService = require("./MailService");
 const localeHelper = require("../helpers/LocaleHelper");
 const dateHelper = require("../helpers/DateHelper");
 const constants = require("../helpers/Constants");
+const attendanceApiService = require("./AttendanceApiService");
 
 /**
  * ============================================
@@ -31,21 +31,13 @@ class AttendanceService {
             throw new Error(localeHelper.translate("ALREADY_CLOCKED_IN_TODAY", locale));
         }
 
-        const now = dateHelper.now();
+        await attendanceApiService.clockIn(employee);
 
-        if (this.lateClockIn(now)) {
-        }
+        const updatedAttendance = await attendanceRepository.getTodayAttendance(employee.USERNO);
 
-        await mailService.sendClockIn(
-            session.accessToken,
-            employee,
-            now
-        );
+        console.log("Updated Attendance Record:", updatedAttendance.userNo);
 
-        return Object.assign(employee, {
-            CLOCK_IN: dateHelper.datetime(now),
-
-        });
+        return updatedAttendance;
     }
 
     /**

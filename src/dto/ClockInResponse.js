@@ -22,10 +22,10 @@ class ClockInResponse {
         this.warning = warning;
 
         this.employee = {
-            id: employee.USERNO,
-            name: employee.USERNAME,
-            email: employee.MAILADDRESS,
-            clockIn: employee.CLOCK_IN
+            id: employee.userNo,
+            date: employee.date_,
+            startHour: employee.startHour,
+            startMin: employee.startMin
         };
 
     }

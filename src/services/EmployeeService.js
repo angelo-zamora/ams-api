@@ -1,4 +1,4 @@
-const employeeRepository = require("../repositories/mysql/EmployeeRepository");
+const employeeRepository = require("../repositories/EmployeeRepository");
 const localeHelper = require("../helpers/LocaleHelper");
 /**
  * ============================================
