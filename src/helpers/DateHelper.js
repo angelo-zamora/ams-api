@@ -56,6 +56,16 @@ class DateHelper {
 
     }
 
+    parseDateTime(dateStr, timeStr) {
+        const year = Number(dateStr.slice(0, 4));
+        const month = Number(dateStr.slice(4, 6)) - 1;
+        const day = Number(dateStr.slice(6, 8));
+        const [hour, minute] = timeStr.split(":").map(Number);
+
+        return new Date(year, month, day, hour, minute);
+    }
+
+
 }
 
 module.exports = new DateHelper();

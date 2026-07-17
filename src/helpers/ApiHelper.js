@@ -1,7 +1,11 @@
 const tokenRepository = require("../repositories/TokenRepository");
 const attendanceApiConfig = require("../config/AttendanceApiConfig");
+const logger = require("../helpers/Logger");
 
 class ApiHelper {
+    constructor() {
+        this.initializationPromise = null;
+    }
 
     /**
      * Get a valid access token for the employee, either from cache or by requesting a new one.
@@ -9,15 +13,28 @@ class ApiHelper {
      * @param {Object} employee - The employee object containing USERNO and PASSWORD.
      * @returns {Promise<string>} - The valid access token.
      */ 
+    async initializeOnStartup(employee) {
+        if (!this.initializationPromise) {
+            this.initializationPromise = this._initializeToken(employee);
+        }
+
+        try {
+            return await this.initializationPromise;
+        } finally {
+            this.initializationPromise = null;
+        }
+    }
+
     async getValidToken(employee) {
-        const cachedToken = tokenRepository.get(employee.USERNO);
+        const normalizedEmployee = this._resolveCredentials(employee);
+        const cachedToken = tokenRepository.get(normalizedEmployee.USERNO);
         const now = Date.now();
 
         if (cachedToken && this._isTokenValid(cachedToken, now)) {
             return cachedToken.access_token;
         }
 
-        const tokenResponse = await this._requestToken(employee);
+        const tokenResponse = await this._requestToken(normalizedEmployee, cachedToken?.refresh_token);
         const tokenPayload = {
             access_token: tokenResponse.body.access_token,
             refresh_token: tokenResponse.body.refresh_token,
@@ -27,7 +44,7 @@ class ApiHelper {
             ).toISOString()
         };
 
-        tokenRepository.set(employee.USERNO, tokenPayload);
+        tokenRepository.set(normalizedEmployee.USERNO, tokenPayload);
         return tokenPayload.access_token;
     }
 
@@ -106,8 +123,21 @@ class ApiHelper {
      * @private
     */
     resolvePassword(employee) {
-        const passwordValue = employee.PASSWORD;
-        return passwordValue || null;
+        return this._resolveCredentials(employee).PASSWORD;
+    }
+
+    _resolveCredentials(employee) {
+        const resolvedEmployee = { ...employee };
+
+        if (!resolvedEmployee.USERNO) {
+            resolvedEmployee.USERNO = process.env.ATTENDANCE_API_USERNO || process.env.ATTENDANCE_API_STARTUP_USERNO || null;
+        }
+
+        if (!resolvedEmployee.PASSWORD) {
+            resolvedEmployee.PASSWORD = process.env.ATTENDANCE_API_PASSWORD || process.env.ATTENDANCE_API_STARTUP_PASSWORD || null;
+        }
+
+        return resolvedEmployee;
     }
 
     /**
@@ -115,13 +145,20 @@ class ApiHelper {
      * 従業員の認証情報を使用して、勤怠管理APIから新しいアクセストークンをリクエストします。
      * @private
     */
-    async _requestToken(employee) {
+    async _requestToken(employee, refreshToken = null) {
         const tokenEndpoint = this.buildUrl("oauth/token");
-        const body = new URLSearchParams({
-            grant_type: "password",
-            username: employee.USERNO,
-            password: employee.PASSWORD
-        }).toString();
+        const bodyParams = refreshToken
+            ? {
+                grant_type: "refresh_token",
+                refresh_token: refreshToken
+            }
+            : {
+                grant_type: "password",
+                username: employee.USERNO,
+                password: employee.PASSWORD
+            };
+
+        const body = new URLSearchParams(bodyParams).toString();
 
         return this.requestWithRetry({
             method: "POST",
@@ -144,6 +181,20 @@ class ApiHelper {
             return false;
         }
         return new Date(token.token_expiration_time).getTime() > now;
+    }
+
+    async _initializeToken(employee) {
+        try {
+            const normalizedEmployee = this._resolveCredentials(employee);
+            if (!normalizedEmployee.USERNO || !normalizedEmployee.PASSWORD) {
+                return null;
+            }
+
+            return await this.getValidToken(normalizedEmployee);
+        } catch (error) {
+            logger.error(error);
+            return null;
+        }
     }
 }
 

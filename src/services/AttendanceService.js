@@ -4,6 +4,7 @@ const localeHelper = require("../helpers/LocaleHelper");
 const dateHelper = require("../helpers/DateHelper");
 const constants = require("../helpers/Constants");
 const attendanceApiService = require("./AttendanceApiService");
+const validator = require("../validators/AttendanceValidator");
 
 /**
  * ============================================
@@ -27,58 +28,29 @@ class AttendanceService {
         const attendance =
             await attendanceRepository.getTodayAttendance(employee.USERNO);
 
-        if (attendance) {
-            throw new Error(localeHelper.translate("ALREADY_CLOCKED_IN_TODAY", locale));
-        }
+        validator.validateClockIn(attendance);
 
         await attendanceApiService.clockIn(employee);
-
-        const updatedAttendance = await attendanceRepository.getTodayAttendance(employee.USERNO);
-
-        console.log("Updated Attendance Record:", updatedAttendance.userNo);
-
-        return updatedAttendance;
     }
 
     /**
-     * Clock Out
+     * Get Attendance Today
      */
-    async clockOut(session, locale) {
-
+    async getAttendanceToday(session, locale) {
         const email = session.currentUser.email;
 
         const employee = await employeeService.validateEmployee(email, locale);
 
-        const attendance =
-            await attendanceRepository.getTodayAttendance(email);
+        const attendance = await attendanceRepository.getTodayAttendance(employee.USERNO);
 
-        if (!attendance) {
-            throw new Error(localeHelper.translate("NO_CLOCK_IN_FOUND", locale));
-        }
+        validator.validateTodayAttendance(attendance);
 
-        if (attendance.clock_out) {
-            throw new Error(localeHelper.translate("ALREADY_CLOCKED_OUT", locale));
-        }
+        const lateClockin = this.lateClockIn(dateHelper.parseDateTime(attendance.date_, `${attendance.startHour}:${attendance.startMin}`)) 
+                    ? constants.WARNING.LATE_CLOCK_IN : null;
 
-        await attendanceRepository.clockOut(email);
+        attendance.lateClockin = lateClockin;
 
-        await mailService.sendClockOut(
-            session.accessToken,
-            employee
-
-        );
-
-        return employee;
-    }
-
-    /**
-     * Attendance History
-     */
-    async history(session) {
-
-        return await attendanceRepository.getHistory(
-            session.currentUser.email
-        );
+        return attendance;
     }
 
     /**
@@ -87,7 +59,8 @@ class AttendanceService {
     lateClockIn(clockInTime) {
 
         return clockInTime.getHours() > constants.LATE_CLOCK_IN.HOUR ||
-        (clockInTime.getHours() === constants.LATE_CLOCK_IN.HOUR && clockInTime.getMinutes() >= constants.LATE_CLOCK_IN.MINUTE);
+            (clockInTime.getHours() === constants.LATE_CLOCK_IN.HOUR &&
+            clockInTime.getMinutes() >= constants.LATE_CLOCK_IN.MINUTE);
     }
 }
 

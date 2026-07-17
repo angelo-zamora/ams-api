@@ -10,23 +10,18 @@ const localeHelper = require("../helpers/LocaleHelper");
  */
 class AttendanceValidator {
 
-    validateClockIn(attendance, locale) {
+    validateClockIn(attendance) {
 
         if (attendance) {
-            throw new Error(localeHelper.translate("ALREADY_CLOCKED_IN", locale));
+            throw new Error("ALREADY_CLOCKED_IN_TODAY");
         }
     }
 
-    validateClockOut(attendance, locale) {
+    validateTodayAttendance(attendance) {
 
         if (!attendance) {
 
-            throw new Error(localeHelper.translate("CLOCK_IN_RECORD_NOT_FOUND", locale));
-        }
-
-        if (attendance.clock_out) {
-
-            throw new Error(localeHelper.translate("ALREADY_CLOCKED_OUT", locale));
+            throw new Error("NO_CLOCK_IN_FOUND");
         }
     }
 }

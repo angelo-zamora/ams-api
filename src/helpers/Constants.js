@@ -9,7 +9,8 @@
 module.exports = {
 
     STATUS: {
-        CLOCK_IN_SUCCESS: "CLOCK_IN_SUCCESS", 
+        CLOCK_IN_SUCCESS: "CLOCK_IN_SUCCESS",
+        SUCCESS: "SUCCESS",
     },
 
     WARNING: {

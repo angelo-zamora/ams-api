@@ -1,11 +1,13 @@
+const db = require("../database/DatabaseFactory");
+
 /**
  * ============================================
  * Employee Repository
+ * 従業員リポジトリ
+ * Author: CRESS-INFO Angelo
+ * Date: 2026/07/14
  * ============================================
  */
-
-const db = require("../database/DatabaseFactory");
-
 class EmployeeRepository {
 
     /**
@@ -28,6 +30,25 @@ class EmployeeRepository {
 
         return rows.length ? rows[0] : null;
 
+    }
+
+    /**
+     * Find first employee
+     */
+    async findFirstEmployee() {
+
+        const sql = `
+            SELECT
+                *
+            FROM USERINFO
+            WHERE MAILADDRESS IS NOT NULL
+            AND ROWNUM = 1
+        `;
+
+        const result = await db.getConnection().execute(sql);
+        const rows = Array.isArray(result) ? result[0] : result.rows || [];
+
+        return rows.length ? rows[0] : null;
     }
 
     /**

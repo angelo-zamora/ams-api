@@ -3,7 +3,7 @@ const mysql = require("../config/Connection");
 /**
  * ============================================
  * Database Factory
- * ????????????
+ * データベースファクトリ
  * Author: CRESS-INFO Angelo
  * Date: 2026/07/14
  * ============================================

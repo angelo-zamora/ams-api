@@ -1,4 +1,3 @@
-// src/models/TimeManage.js
 class TimeManage {
   constructor(data = {}) {
     this.userNo = data.USERNO || null;

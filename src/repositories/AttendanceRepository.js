@@ -4,7 +4,7 @@ const TimeManage = require("../models/TimeManage");
 /**
  * ============================================
  * Attendance Repository
- * ?????????
+ * ½Ð¶Ð´ÉÍý
  * Author: CRESS-INFO Angelo
  * Date: 2026/07/14
  * ============================================

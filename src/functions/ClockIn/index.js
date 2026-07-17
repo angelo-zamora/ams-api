@@ -22,22 +22,13 @@ app.http("ClockIn", {
         }
         catch (error) {
             context.error(error);
+
+            if (error?.message === "ALREADY_CLOCKED_IN_TODAY") {
+                return response.conflict("ALREADY_CLOCKED_IN_TODAY", request);
+            }
             return response.serverError(error, request);
         }
 
     }
 
-});
-
-app.http("Health", {
-    methods: ["GET"],
-    authLevel: "anonymous",
-    handler: async (request, context) => {
-        return {
-            status: 200,
-            jsonBody: {
-                status: "OK"
-            }
-        };
-    }
 });

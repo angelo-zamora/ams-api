@@ -23,24 +23,52 @@ class ResponseHelper {
     }
 
     badRequest(message, locale) {
+        const resolvedLocale = localeHelper.resolveLocale(locale);
 
         return {
             status: 400,
             jsonBody: {
                 success: false,
-                message: localeHelper.translate(message, locale)
+                message: localeHelper.translate(message, resolvedLocale)
+            }
+        };
+
+    }
+
+    notFound(message, locale) {
+        const resolvedLocale = localeHelper.resolveLocale(locale);
+
+        return {
+            status: 404,
+            jsonBody: {
+                success: false,
+                message: localeHelper.translate(message, resolvedLocale)
             }
         };
 
     }
 
     unauthorized(locale) {
+        const resolvedLocale = localeHelper.resolveLocale(locale);
 
         return {
             status: 401,
             jsonBody: {
                 success: false,
-                message: localeHelper.translate("UNAUTHORIZED", locale)
+                message: localeHelper.translate("UNAUTHORIZED", resolvedLocale)
+            }
+        };
+
+    }
+
+    conflict(message, locale) {
+        const resolvedLocale = localeHelper.resolveLocale(locale);
+
+        return {
+            status: 409,
+            jsonBody: {
+                success: false,
+                message: localeHelper.translate(message, resolvedLocale)
             }
         };
 
@@ -48,14 +76,16 @@ class ResponseHelper {
 
     serverError(error, locale) {
         const resolvedLocale = localeHelper.resolveLocale(locale);
-        const messageKey = typeof error?.message === "string" ? error.message.toUpperCase() : "SERVER_ERROR";
+        const rawMessage = typeof error?.message === "string" ? error.message : "SERVER_ERROR";
+        const messageKey = rawMessage.toUpperCase();
         const translatedMessage = localeHelper.translate(messageKey, resolvedLocale);
+        const finalMessage = translatedMessage === messageKey ? rawMessage : translatedMessage;
 
         return {
             status: 500,
             jsonBody: {
                 success: false,
-                message: translatedMessage
+                message: finalMessage
             }
         };
     }

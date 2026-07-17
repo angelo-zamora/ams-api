@@ -11,6 +11,21 @@ const apiHelper = require("../helpers/ApiHelper");
  */
 class AttendanceApiService {
     /**
+     * Initialize the attendance API on startup.
+     * 起動時に勤怠APIを初期化します。
+     * @param {Object} employee - The employee object containing USERNO and PASSWORD.
+     * @returns {Promise<string>} - The valid access token.
+     */
+    async initializeOnStartup(employee) {
+        try {
+            return await apiHelper.initializeOnStartup(employee);
+        } catch (error) {
+            logger.error(error);
+            throw error;
+        }
+    }
+
+    /**
      * Clock in an employee by calling the attendance API.
      * 従業員の出勤を記録するには、勤怠管理APIを呼び出します。
      * @param {Object} employee - The employee object containing USERNO and PASSWORD.

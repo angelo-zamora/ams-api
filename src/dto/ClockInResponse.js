@@ -18,16 +18,6 @@ class ClockInResponse {
         this.message = localeHelper.translate("CLOCK_IN_COMPLETED", locale);
 
         this.code = constants.STATUS.CLOCK_IN_SUCCESS;
-
-        this.warning = warning;
-
-        this.employee = {
-            id: employee.userNo,
-            date: employee.date_,
-            startHour: employee.startHour,
-            startMin: employee.startMin
-        };
-
     }
 
 }
