@@ -1,5 +1,6 @@
 const attendanceService = require("../services/AttendanceService");
 const ClockInResponse = require("../dto/ClockInResponse");
+const ClockOutResponse = require("../dto/ClockOutResponse");
 const AttendanceTodayResponse = require("../dto/AttendanceTodayResponse");
 const constants = require("../helpers/Constants");
 
@@ -24,6 +25,19 @@ class AttendanceController {
         const employee = await attendanceService.clockIn(session, locale);
 
         return new ClockInResponse(employee, locale);
+    }
+
+    /**
+     * Clock out an employee.
+     * 従業員の出勤を記録する。
+     * @param {Object} session - The session object containing user information.
+     * @param {string} locale - The locale for response messages.
+     * @returns {Promise<ClockOutResponse>} - The response containing employee information after clocking in.
+     */
+    async clockOut(session, locale) {
+        const employee = await attendanceService.clockOut(session, locale);
+
+        return new ClockOutResponse(employee, locale);
     }
 
     /**

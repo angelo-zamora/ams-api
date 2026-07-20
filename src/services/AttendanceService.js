@@ -30,7 +30,33 @@ class AttendanceService {
 
         validator.validateClockIn(attendance);
 
-        await attendanceApiService.clockIn(employee);
+        attendanceApiService.clockIn(employee);
+    }
+
+    /**
+     * Clock Out
+     */
+    async clockOut(session, locale) {
+
+        const email = session.currentUser.email;
+
+        const employee = await employeeService.validateEmployee(email, locale);
+
+        const attendance =
+            await attendanceRepository.getTodayAttendance(employee.USERNO);
+
+        console.log(attendance);
+
+        validator.validateClockOut(attendance);
+
+        const lateClockin = this.lateClockIn(dateHelper.parseDateTime(attendance.date_, `${attendance.startHour}:${attendance.startMin}`)) 
+                    ? constants.WARNING.LATE_CLOCK_IN : null;
+
+        attendance.lateClockin = lateClockin;
+
+        attendanceApiService.clockOut(employee);
+
+        return attendance;
     }
 
     /**
@@ -44,11 +70,6 @@ class AttendanceService {
         const attendance = await attendanceRepository.getTodayAttendance(employee.USERNO);
 
         validator.validateTodayAttendance(attendance);
-
-        const lateClockin = this.lateClockIn(dateHelper.parseDateTime(attendance.date_, `${attendance.startHour}:${attendance.startMin}`)) 
-                    ? constants.WARNING.LATE_CLOCK_IN : null;
-
-        attendance.lateClockin = lateClockin;
 
         return attendance;
     }

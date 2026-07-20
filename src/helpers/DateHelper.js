@@ -52,7 +52,7 @@ class DateHelper {
 
         const get = (type) => parts.find(p => p.type === type).value;
 
-        return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}:${get("second")}`;
+        return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}`;
 
     }
 
@@ -61,11 +61,30 @@ class DateHelper {
         const month = Number(dateStr.slice(4, 6)) - 1;
         const day = Number(dateStr.slice(6, 8));
         const [hour, minute] = timeStr.split(":").map(Number);
-
-        return new Date(year, month, day, hour, minute);
+        
+        // Determine the timezone offset by checking what a test UTC time looks like in our timezone
+        const testUtcDate = new Date(Date.UTC(year, month, day, 12, 0, 0));
+        
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: config.timezone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        const parts = formatter.formatToParts(testUtcDate);
+        const getTestHour = () => Number(parts.find(p => p.type === 'hour')?.value || 0);
+        
+        // Calculate the timezone offset in hours
+        const offsetHours = getTestHour() - 12;
+        
+        // Convert input time to UTC by subtracting the offset
+        const utcHour = hour - offsetHours;
+        
+        return new Date(Date.UTC(year, month, day, utcHour, minute, 0));
     }
-
-
 }
 
 module.exports = new DateHelper();

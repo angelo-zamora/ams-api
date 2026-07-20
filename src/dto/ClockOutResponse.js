@@ -3,23 +3,23 @@ const constants = require("../helpers/Constants");
 
 /**
  * ============================================
- * Clock In Response DTO
- * 出勤レスポンス
+ * Clock Out Response DTO
+ * �жХ쥹�ݥ�
  * Author: CRESS-INFO Angelo
- * Date: 2026/07/14
+ * Date: 2026/07/20
  * ============================================
  */
-class ClockInResponse {
+class ClockOutResponse {
 
     constructor(employee, locale) {
 
         this.success = true;
 
-        this.message = localeHelper.translate("CLOCK_IN_COMPLETED", locale);
+        this.message = localeHelper.translate("CLOCK_OUT_COMPLETED", locale);
 
-        this.code = constants.STATUS.CLOCK_IN_SUCCESS;
+        this.code = constants.STATUS.CLOCK_OUT_SUCCESS;
     }
 
 }
 
-module.exports = ClockInResponse;
+module.exports = ClockOutResponse;

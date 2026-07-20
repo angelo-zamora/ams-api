@@ -1,7 +1,13 @@
 const config = require("../config/DatabaseConfig");
 const oracledb = require("oracledb");
 
-oracledb.initOracleClient({ libDir: process.env.ORACLE_LIB_DIR });
+if (process.env.ORACLE_LIB_DIR) {
+    try {
+        oracledb.initOracleClient({ libDir: process.env.ORACLE_LIB_DIR });
+    } catch (err) {
+        console.error("Failed to initialize Oracle client:", err);
+    }
+}
 
 const pool = {
     async execute(sql, params) {

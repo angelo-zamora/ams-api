@@ -3,6 +3,10 @@ const attendanceApiService = require('./services/AttendanceApiService');
 const employeeRepository = require('./repositories/EmployeeRepository');
 const logger = require('./helpers/Logger');
 
+require("./functions/ClockIn");
+require("./functions/ClockOut");
+require("./functions/Attendance");
+
 app.setup({
     enableHttpStream: true,
 });

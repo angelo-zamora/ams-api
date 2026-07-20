@@ -13,14 +13,25 @@ class AttendanceValidator {
     validateClockIn(attendance) {
 
         if (attendance) {
-            throw new Error("ALREADY_CLOCKED_IN_TODAY");
+            if (attendance.startHour != null && attendance.startMin != null) {
+                throw new Error("ALREADY_CLOCKED_IN_TODAY");
+            }
+        }
+    }
+
+    validateClockOut(attendance) {
+
+        this.validateTodayAttendance(attendance);
+
+        if (attendance) {
+            if (attendance.endHour != null && attendance.endMin != null) {
+                throw new Error("ALREADY_CLOCKED_OUT");
+            }
         }
     }
 
     validateTodayAttendance(attendance) {
-
         if (!attendance) {
-
             throw new Error("NO_CLOCK_IN_FOUND");
         }
     }

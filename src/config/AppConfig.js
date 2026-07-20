@@ -9,6 +9,6 @@
 module.exports = {
     environment: process.env.NODE_ENV || "development",
     appName: "Kintai Teams Backend",
-    timezone: "Asia/Tokyo",
+    timezone: "UTC",
     apiVersion: "v1"
 };
