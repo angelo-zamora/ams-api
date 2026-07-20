@@ -33,6 +33,33 @@ class AttendanceRepository {
         return rows.length ? TimeManage.fromDbRow(rows[0]) : null;
 
     }
+
+    /**
+     * Get users still clocked in today
+     */
+    async getStillClockedInUsers() {
+        const sql = `
+            SELECT
+                u.MAILADDRESS as mail
+            FROM TIMEMANAGE t
+            INNER JOIN USERINFO u ON t.USERNO = u.USERNO
+            WHERE t.DATE_ = TO_CHAR(SYSDATE, 'YYYYMMDD')
+              AND t.STARTHOUR IS NOT NULL
+              AND (t.ENDHOUR IS NULL OR t.ENDHOUR = '')
+              AND u.MAILADDRESS IS NOT NULL
+              AND NOT EXISTS (
+                    SELECT 1
+                    FROM ZANGYOU o
+                    WHERE o.USERNO = t.USERNO
+                    AND o.DATE_ = t.DATE_
+                )
+        `;
+
+        const result = await db.getConnection().execute(sql);
+        const rows = Array.isArray(result) ? result[0] : result.rows || [];
+
+        return rows;
+    }
 }
 
 module.exports = new AttendanceRepository();

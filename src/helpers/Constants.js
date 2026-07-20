@@ -31,5 +31,7 @@ module.exports = {
     LATE_CLOCK_IN: {
         HOUR: 8,
         MINUTE: 16
-    }
+    },
+
+    CLOCK_OUT_REMINDER: "0 0 17 * * 1-5" // 5PM EVERYDAY MONDAY TO FRIDAY
 };

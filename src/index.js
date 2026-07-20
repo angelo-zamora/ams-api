@@ -6,6 +6,7 @@ const logger = require('./helpers/Logger');
 require("./functions/ClockIn");
 require("./functions/ClockOut");
 require("./functions/Attendance");
+require("./functions/ClockOutReminder");
 
 app.setup({
     enableHttpStream: true,
