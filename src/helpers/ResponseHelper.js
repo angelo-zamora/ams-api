@@ -22,14 +22,15 @@ class ResponseHelper {
 
     }
 
-    badRequest(message, locale) {
+    badRequest(message, locale, data = {}) {
         const resolvedLocale = localeHelper.resolveLocale(locale);
 
         return {
             status: 400,
             jsonBody: {
                 success: false,
-                message: localeHelper.translate(message, resolvedLocale)
+                message: localeHelper.translate(message, resolvedLocale),
+                data
             }
         };
 
@@ -61,7 +62,7 @@ class ResponseHelper {
 
     }
 
-    conflict(message, locale) {
+    conflict(message, locale, data = {}) {
         const resolvedLocale = localeHelper.resolveLocale(locale);
 
         return {

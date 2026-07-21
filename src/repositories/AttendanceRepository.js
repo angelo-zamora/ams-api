@@ -4,7 +4,7 @@ const TimeManage = require("../models/TimeManage");
 /**
  * ============================================
  * Attendance Repository
- * ?????????
+ * 出勤管理リポジトリ
  * Author: CRESS-INFO Angelo
  * Date: 2026/07/14
  * ============================================
@@ -51,7 +51,7 @@ class AttendanceRepository {
                     SELECT 1
                     FROM ZANGYOU o
                     WHERE o.USERNO = t.USERNO
-                    AND o.DATE_ = t.DATE_
+                    AND o.REQDATE = t.DATE_
                 )
         `;
 

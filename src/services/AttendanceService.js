@@ -31,6 +31,8 @@ class AttendanceService {
         validator.validateClockIn(attendance);
 
         attendanceApiService.clockIn(employee);
+
+        return employee;
     }
 
     /**
