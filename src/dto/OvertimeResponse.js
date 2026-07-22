@@ -14,9 +14,9 @@ class OvertimeResponse {
 
     constructor(overtime = null, locale) {
 
-        this.success = true;
-
         this.message = localeHelper.translate("OVERTIME_COMPLETED", locale);
+        
+        this.code = constants.STATUS.OVERTIME_SUCCESS;
 
         if (overtime == null) return;
 

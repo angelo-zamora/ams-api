@@ -11,7 +11,6 @@ const localeHelper = require("./LocaleHelper");
 class ResponseHelper {
 
     success(data, locale) {
-
         return {
             status: 200,
             jsonBody: {
@@ -69,7 +68,10 @@ class ResponseHelper {
             status: 409,
             jsonBody: {
                 success: false,
-                message: localeHelper.translate(message, resolvedLocale)
+                data: {
+                    message: localeHelper.translate(message, resolvedLocale),
+                    code: message
+                }
             }
         };
 

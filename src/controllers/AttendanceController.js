@@ -48,9 +48,9 @@ class AttendanceController {
      * @returns {Promise<AttendanceTodayResponse>} - The response containing attendance information for the current day.
      */
     async getAttendanceToday(session , locale) {
-        const employee = await attendanceService.getAttendanceToday(session);
+        const attendance = await attendanceService.getAttendanceToday(session);
 
-        return new AttendanceTodayResponse(employee, locale);
+        return new AttendanceTodayResponse(attendance, locale);
     }
 }
 

@@ -27,6 +27,10 @@ app.http("overtime", {
                 return response.badRequest("VALIDATION_FAILED", request, error);
             }
 
+            if (error?.message === "ALREADY_OVERTIME_REQ_TODAY") {
+                return response.conflict("ALREADY_OVERTIME_REQ_TODAY", request);
+            }
+
             return response.serverError(error, request);
         }
 

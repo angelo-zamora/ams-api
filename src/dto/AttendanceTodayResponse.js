@@ -12,21 +12,18 @@ const dateHelper = require("../helpers/DateHelper");
  */
 class AttendanceTodayResponse {
 
-    constructor(employee, locale) {
+    constructor(attendance, locale) {
+        this.code = attendance['lateClockIn'] ?? constants.STATUS.SUCCESS;
 
-        this.success = true;
-
-        this.code = employee.lateClockin ?? constants.STATUS.SUCCESS;
-
-        this.employee = {
-            userNo: employee.userNo,
+        this.attendance = {
+            userNo: attendance.userNo,
             clockin: dateHelper.datetime(
                 dateHelper.parseDateTime(
-                    employee.date_, `${employee.startHour}:${employee.startMin}`)
+                    attendance.date_, `${attendance.startHour}:${attendance.startMin}`)
             ),
-            clockout: employee.endHour ?dateHelper.datetime(
+            clockout: attendance.endHour ?dateHelper.datetime(
                 dateHelper.parseDateTime(
-                    employee.date_, `${employee.endHour}:${employee.endMin}`)
+                    attendance.date_, `${attendance.endHour}:${attendance.endMin}`)
             ) : null,
         };
 

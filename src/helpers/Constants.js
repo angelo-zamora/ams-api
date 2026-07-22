@@ -11,6 +11,7 @@ module.exports = {
     STATUS: {
         CLOCK_IN_SUCCESS: "CLOCK_IN_SUCCESS",
         CLOCK_OUT_SUCCESS: "CLOCK_OUT_SUCCESS",
+        OVERTIME_SUCCESS: "OVERTIME_COMPLETED",
         SUCCESS: "SUCCESS",
     },
 

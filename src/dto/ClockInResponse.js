@@ -12,9 +12,6 @@ const constants = require("../helpers/Constants");
 class ClockInResponse {
 
     constructor(employee, locale) {
-
-        this.success = true;
-
         this.message = localeHelper.translate("CLOCK_IN_COMPLETED", locale);
 
         this.code = constants.STATUS.CLOCK_IN_SUCCESS;

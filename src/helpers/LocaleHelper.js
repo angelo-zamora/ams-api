@@ -22,7 +22,9 @@ class LocaleHelper {
                 MISSING_AUTHORIZATION_HEADER: "Missing Authorization Header",
                 INVALID_AUTHORIZATION_HEADER: "Invalid Authorization Header",
                 UNAUTHORIZED: "Unauthorized",
-                SERVER_ERROR: "Internal Server Error"
+                SERVER_ERROR: "Internal Server Error",
+                ALREADY_OVERTIME_REQ_TODAY: "Already overtime request today.",
+                OVERTIME_COMPLETED: "Overtime Request completed."
             },
             ja: {
                 CLOCK_IN_COMPLETED: "打刻が完了しました。",
@@ -37,7 +39,9 @@ class LocaleHelper {
                 MISSING_AUTHORIZATION_HEADER: "認証ヘッダーがありません",
                 INVALID_AUTHORIZATION_HEADER: "認証ヘッダーが無効です",
                 UNAUTHORIZED: "認証が必要です",
-                SERVER_ERROR: "サーバーエラーが発生しました"
+                SERVER_ERROR: "サーバーエラーが発生しました",
+                ALREADY_OVERTIME_REQ_TODAY: "すでに残業申請済みです。",
+                OVERTIME_COMPLETED: "残業申請が完了しました。"
             }
         };
     }
