@@ -137,6 +137,13 @@ class OvertimeValidator {
             errors.push("INVALID_TIME_RANGE");
         }
     }
+
+
+    validateTodayOvertime(overtime) {
+        if (!overtime) {
+            throw new Error("OVERTIME_NOT_FOUND");
+        }
+    }
 }
 
 module.exports = new OvertimeValidator();

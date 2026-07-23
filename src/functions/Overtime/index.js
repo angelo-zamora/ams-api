@@ -57,6 +57,10 @@ app.http("getOvertime", {
         }
         catch (error) {
             context.error(error);
+
+            if (error?.message === "OVERTIME_NOT_FOUND") {
+                return response.notFound("OVERTIME_NOT_FOUND", request, error);
+            }
             return response.serverError(error, request);
         }
 

@@ -45,6 +45,8 @@ class OvertimeService {
 
         const overtime = await overtimeRepository.getOvertime(employee.USERNO, request.params.reqDate);
 
+        validator.validateTodayOvertime(overtime);
+
         return overtime;
     }
 

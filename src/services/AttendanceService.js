@@ -71,10 +71,10 @@ class AttendanceService {
 
         const attendance = await attendanceRepository.getTodayAttendance(employee.USERNO);
 
+        validator.validateTodayAttendance(attendance);
+
         attendance.lateClockIn = this.lateClockIn(dateHelper.parseDateTime(attendance.date_, `${attendance.startHour}:${attendance.startMin}`)) 
                     ? constants.WARNING.LATE_CLOCK_IN : null;
-
-        validator.validateTodayAttendance(attendance);
 
         return attendance;
     }

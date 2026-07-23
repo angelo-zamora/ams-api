@@ -42,7 +42,11 @@ class ResponseHelper {
             status: 404,
             jsonBody: {
                 success: false,
-                message: localeHelper.translate(message, resolvedLocale)
+                data: {
+                    message: localeHelper.translate(message, resolvedLocale),
+                    code: message
+                }
+                
             }
         };
 

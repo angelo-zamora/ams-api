@@ -24,7 +24,8 @@ class LocaleHelper {
                 UNAUTHORIZED: "Unauthorized",
                 SERVER_ERROR: "Internal Server Error",
                 ALREADY_OVERTIME_REQ_TODAY: "Already overtime request today.",
-                OVERTIME_COMPLETED: "Overtime Request completed."
+                OVERTIME_COMPLETED: "Overtime Request completed.",
+                OVERTIME_NOT_FOUND: "Overtime not found."
             },
             ja: {
                 CLOCK_IN_COMPLETED: "打刻が完了しました。",
@@ -41,7 +42,8 @@ class LocaleHelper {
                 UNAUTHORIZED: "認証が必要です",
                 SERVER_ERROR: "サーバーエラーが発生しました",
                 ALREADY_OVERTIME_REQ_TODAY: "すでに残業申請済みです。",
-                OVERTIME_COMPLETED: "残業申請が完了しました。"
+                OVERTIME_COMPLETED: "残業申請が完了しました。",
+                OVERTIME_NOT_FOUND: "残業申請が見つかりません。"
             }
         };
     }
