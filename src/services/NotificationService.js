@@ -1,12 +1,14 @@
+const employeeRepository = require("../repositories/EmployeeRepository");
+const attendanceRepository = require("../repositories/AttendanceRepository");
+const overtimeRepository = require("../repositories/OvertimeRepository");
+const graphService = require("../graph/GraphService");
+const dateHelper = require("../helpers/DateHelper");
 /**
  * ============================================
  * Notification Service
  * 通知サービス
  * ============================================
  */
-
-const employeeRepository = require("../repositories/EmployeeRepository");
-const attendanceRepository = require("../repositories/AttendanceRepository");
 
 class NotificationService {
 
@@ -35,7 +37,6 @@ class NotificationService {
     }
 
     async notifyClockOutReminder() {
-        const graphService = require("../graph/GraphService");
         const users = await attendanceRepository.getStillClockedInUsers();
         
         console.log(`Sending clock out reminder to ${users.length} employees.`);
@@ -59,6 +60,45 @@ class NotificationService {
             } catch (error) {
                 console.error(`Failed to send proactive Teams message to ${email}:`, error.message);
             }
+        }
+    }
+
+    async notifyOvertimeClockOutReminder() {
+        const users = await overtimeRepository.getUsersOnOvertimeStillClockedIn();
+        
+        console.log(`Sending clock out Overtime reminder to ${users.length} employees.`);
+        
+        const message = "Your overtime session has been active for 3 hours. Do you want to continue working overtime?";
+
+        for (const user of users) {
+                const otStart = new Date();
+                otStart.setHours(
+                    Number(user.OT_STARTHOUR),
+                    Number(user.OT_STARTMIN),
+                    0,
+                    0
+                );
+
+                const diffMinutes = Math.floor((dateHelper.now() - otStart) / 60000);
+
+                if (diffMinutes >= 180) {
+                    const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
+                    console.log(`To: ${email}`);
+                    console.log(`Message: ${message}`);
+                    
+                    try {
+                        if (email) {
+                            const objectId = await graphService.getUserObjectId(email);
+                            if (objectId) {
+                                const botService = require("./BotService");
+                                await botService.sendProactiveMessage(objectId, message);
+                                console.log(`Successfully sent proactive Teams message to: ${email}`);
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`Failed to send proactive Teams message to ${email}:`, error.message);
+                    }
+                }
         }
     }
 

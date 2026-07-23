@@ -8,6 +8,7 @@ require("./functions/ClockOut");
 require("./functions/Attendance");
 require("./functions/ClockOutReminder");
 require("./functions/Overtime");
+require("./functions/OvertimeClockOutReminder");
 
 app.setup({
     enableHttpStream: true,
