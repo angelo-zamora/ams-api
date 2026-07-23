@@ -3,6 +3,7 @@ const attendanceRepository = require("../repositories/AttendanceRepository");
 const overtimeRepository = require("../repositories/OvertimeRepository");
 const graphService = require("../graph/GraphService");
 const dateHelper = require("../helpers/DateHelper");
+const botService = require("./BotService");
 /**
  * ============================================
  * Notification Service
@@ -11,30 +12,6 @@ const dateHelper = require("../helpers/DateHelper");
  */
 
 class NotificationService {
-
-    async notifyLateClockIn() {
-
-        const employees =
-            await employeeRepository.getActiveEmployees();
-
-        console.log(
-
-            `Checking ${employees.length} employees.`
-
-        );
-
-        /*
-            Future implementation
-
-            Graph Teams Chat
-
-            Adaptive Card
-
-            Reminder
-
-        */
-
-    }
 
     async notifyClockOutReminder() {
         const users = await attendanceRepository.getStillClockedInUsers();
@@ -52,7 +29,6 @@ class NotificationService {
                 if (email) {
                     const objectId = await graphService.getUserObjectId(email);
                     if (objectId) {
-                        const botService = require("./BotService");
                         await botService.sendProactiveMessage(objectId, message);
                         console.log(`Successfully sent proactive Teams message to: ${email}`);
                     }
@@ -90,7 +66,6 @@ class NotificationService {
                         if (email) {
                             const objectId = await graphService.getUserObjectId(email);
                             if (objectId) {
-                                const botService = require("./BotService");
                                 await botService.sendProactiveMessage(objectId, message);
                                 console.log(`Successfully sent proactive Teams message to: ${email}`);
                             }
@@ -99,6 +74,32 @@ class NotificationService {
                         console.error(`Failed to send proactive Teams message to ${email}:`, error.message);
                     }
                 }
+        }
+    }
+
+    async notifyNoClockinReminder() {
+        const users = await attendanceRepository.getNoClockInUsers();
+        
+        console.log(`Sending no clock in reminder to ${users.length} employees.`);
+        
+        const message = "It looks like you've not clocked in today. Please clock in.";
+
+        for (const user of users) {
+            const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
+            console.log(`To: ${email}`);
+            console.log(`Message: ${message}`);
+            
+            try {
+                if (email) {
+                    const objectId = await graphService.getUserObjectId(email);
+                    if (objectId) {
+                        await botService.sendProactiveMessage(objectId, message);
+                        console.log(`Successfully sent proactive Teams message to: ${email}`);
+                    }
+                }
+            } catch (error) {
+                console.error(`Failed to send proactive Teams message to ${email}:`, error.message);
+            }
         }
     }
 
