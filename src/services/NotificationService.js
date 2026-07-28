@@ -4,10 +4,11 @@ const overtimeRepository = require("../repositories/OvertimeRepository");
 const graphService = require("../graph/GraphService");
 const dateHelper = require("../helpers/DateHelper");
 const botService = require("./BotService");
+const constants = require("../helpers/Constants");
 /**
  * ============================================
  * Notification Service
- * ÄÌÃÎ¥µ¡¼¥Ó¥¹
+ * é€šçŸ¥ã‚µãƒ¼ãƒ“ã‚¹
  * ============================================
  */
 
@@ -18,7 +19,7 @@ class NotificationService {
         
         console.log(`Sending clock out reminder to ${users.length} employees.`);
         
-        const message = "It looks like you're still clocked in. If you've finished work for the day, please clock out. If you intend to continue working, please submit an overtime request.";
+        const message = constants.NOTIFICATIONS.CLOCK_OUT_REMINDER;
 
         for (const user of users) {
             const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
@@ -44,7 +45,7 @@ class NotificationService {
         
         console.log(`Sending clock out Overtime reminder to ${users.length} employees.`);
         
-        const message = "Your overtime session has been active for 3 hours. Do you want to continue working overtime?";
+        const message = constants.NOTIFICATIONS.OVERTIME_CLOCK_OUT_REMINDER;
 
         for (const user of users) {
                 const otStart = new Date();
@@ -82,7 +83,7 @@ class NotificationService {
         
         console.log(`Sending no clock in reminder to ${users.length} employees.`);
         
-        const message = "It looks like you've not clocked in today. Please clock in.";
+        const message = constants.NOTIFICATIONS.NO_CLOCK_IN_REMINDER;
 
         for (const user of users) {
             const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;

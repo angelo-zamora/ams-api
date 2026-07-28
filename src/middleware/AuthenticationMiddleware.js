@@ -14,11 +14,24 @@ class AuthenticationMiddleware {
     async authenticate(request) {
 
         const locale = localeHelper.resolveLocale(request);
-        const accessToken = jwtValidator.validate(request, locale);
-        const currentUser = await graphService.getCurrentUser(accessToken);
+
+        const {
+            accessToken,
+            claims
+        } = await jwtValidator.validate(request, locale);
+        
+        const currentUser = {
+            aadObjectId: claims.oid,
+            email:
+                claims.preferred_username ||
+                claims.upn ||
+                claims.unique_name,
+            name:
+                claims.name ||
+                `${claims.given_name} ${claims.family_name}`
+        };
 
         return {
-
             accessToken,
             currentUser
         };

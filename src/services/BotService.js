@@ -19,7 +19,7 @@ class BotService {
         if (!process.env.AZURE_CLIENT_ID || !process.env.AZURE_CLIENT_SECRET || !process.env.AZURE_TENANT_ID) {
             throw new Error("Missing bot credentials (AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, or AZURE_TENANT_ID).");
         }
-        const credentials = new MicrosoftAppCredentials(process.env.AZURE_CLIENT_ID, process.env.AZURE_CLIENT_SECRET);
+        const credentials = new MicrosoftAppCredentials(process.env.AZURE_CLIENT_ID, process.env.AZURE_CLIENT_SECRET, process.env.AZURE_TENANT_ID);
         const client = new ConnectorClient(credentials, { baseUri: this.serviceUrl });
         const conversationParameters = {
             isGroup: false,

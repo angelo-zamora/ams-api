@@ -34,6 +34,12 @@ module.exports = {
         MINUTE: 16
     },
 
+    NOTIFICATIONS: {
+        CLOCK_OUT_REMINDER: "**⏳️ まもなくシフト終了時間です**<br/><br/>まだ退勤打刻がされていないようです。本日の業務を終了される場合は、退勤打刻を行ってください。引き続き業務を継続される場合は、残業申請を提出してください。",
+        OVERTIME_CLOCK_OUT_REMINDER: "残業時間が3時間に達しました。このまま残業を継続しますか？",
+        NO_CLOCK_IN_REMINDER: "**⏳️ まもなくシフト開始時間です**<br/><br/>勤務開始まであと1分ですが、まだ出勤打刻がされていません。勤怠カードから出勤打刻を行ってください。"
+    },
+
     CLOCK_OUT_REMINDER: "0 0 17 * * 1-5", // 5PM EVERYDAY MONDAY TO FRIDAY
 
     OVERTIME_REMINDER: "0 */5 17-23 * * 1-5", // EVERY 5 MINUTES FROM 5PM TO 11PM
