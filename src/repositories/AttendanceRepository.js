@@ -110,6 +110,29 @@ class AttendanceRepository {
 
         return rows;
     }
+
+    async getNoClockInUsersToday()
+    {
+        const sql = `
+            SELECT
+                u.USERNO,
+                u.MAILADDRESS
+            FROM USERINFO u
+            WHERE u.MAILADDRESS IS NOT NULL
+            AND NOT EXISTS (
+                SELECT 1
+                FROM TIMEMANAGE t
+                WHERE t.USERNO = u.USERNO
+                AND t.DATE_ = TO_CHAR(SYSDATE, 'YYYYMMDD')
+                AND t.STARTHOUR IS NOT NULL
+            )
+        `;
+
+        const result = await db.getConnection().execute(sql);
+        const rows = Array.isArray(result) ? result[0] : result.rows || [];
+
+        return rows;
+    }
 }
 
 module.exports = new AttendanceRepository();

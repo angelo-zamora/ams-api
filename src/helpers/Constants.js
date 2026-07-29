@@ -38,6 +38,7 @@ module.exports = {
         CLOCK_OUT_REMINDER: "**⏳️ まもなくシフト終了時間です**<br/><br/>まだ退勤打刻がされていないようです。本日の業務を終了される場合は、退勤打刻を行ってください。引き続き業務を継続される場合は、残業申請を提出してください。",
         OVERTIME_CLOCK_OUT_REMINDER: "OVERTIME_CLOCK_OUT_REMINDER",
         NO_CLOCK_OUT_REMINDER: "NO_CLOCK_OUT_REMINDER",
+        DAILY_CLOCK_IN_REMINDER: "DAILY_CLOCK_IN_REMINDER",
         NO_CLOCK_IN_REMINDER: "**⏳️ まもなくシフト開始時間です**<br/><br/>勤務開始まであと1分ですが、まだ出勤打刻がされていません。勤怠カードから出勤打刻を行ってください。"
     },
     // 5:00 PM Philippine Time (Monday-Friday)
@@ -48,6 +49,9 @@ module.exports = {
 
     // 11:59 PM Monday-Friday (PHT)
     NO_CLOCK_OUT_REMINDER: "0 59 15 * * 1-5",
+
+    // 7:30 AM PHT Monday-Friday
+    CLOCK_IN_REMINDER: "0 30 23 * * 0-4",
 
     // 7:59 AM Philippine Time Monday-Friday
     // In UTC this is 11:59 PM on the previous day,

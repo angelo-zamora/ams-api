@@ -130,6 +130,31 @@ class NotificationService {
         }
     }
 
+    async notifyToClockinReminder() {
+        const users = await attendanceRepository.getNoClockInUsersToday();
+        
+        console.log(`Sending new card reminder to ${users.length} employees.`);
+        
+        const message = constants.NOTIFICATIONS.DAILY_CLOCK_IN_REMINDER;
+
+        for (const user of users) {
+            const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
+            console.log(`To: ${email}`);
+            console.log(`Message: ${message}`);
+            
+            try {
+                if (email) {
+                    const objectId = await graphService.getUserObjectId(email);
+                    if (objectId) {
+                        await botService.sendProactiveMessage(objectId, message);
+                        console.log(`Successfully sent proactive Teams message to: ${email}`);
+                    }
+                }
+            } catch (error) {
+                console.error(`Failed to send proactive Teams message to ${email}:`, error.message);
+            }
+        }
+    }
 }
 
 module.exports = new NotificationService();
