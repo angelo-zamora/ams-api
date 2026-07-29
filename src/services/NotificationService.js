@@ -104,6 +104,32 @@ class NotificationService {
         }
     }
 
+    async notifyNoClockOutReminder() {
+        const users = await attendanceRepository.getStillNoClockOutUsers();
+        
+        console.log(`Sending clock out reminder to ${users.length} employees.`);
+        
+        const message = constants.NOTIFICATIONS.NO_CLOCK_OUT_REMINDER;
+
+        for (const user of users) {
+            const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
+            console.log(`To: ${email}`);
+            console.log(`Message: ${message}`);
+            
+            try {
+                if (email) {
+                    const objectId = await graphService.getUserObjectId(email);
+                    if (objectId) {
+                        await botService.sendProactiveMessage(objectId, message);
+                        console.log(`Successfully sent proactive Teams message to: ${email}`);
+                    }
+                }
+            } catch (error) {
+                console.error(`Failed to send proactive Teams message to ${email}:`, error.message);
+            }
+        }
+    }
+
 }
 
 module.exports = new NotificationService();

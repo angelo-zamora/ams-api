@@ -10,6 +10,7 @@ require("./functions/ClockOutReminder");
 require("./functions/Overtime");
 require("./functions/OvertimeClockOutReminder");
 require("./functions/NoClockInReminder");
+require("./functions/NoClockOutReminder");
 
 app.setup({
     enableHttpStream: true,

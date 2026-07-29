@@ -87,6 +87,29 @@ class AttendanceRepository {
 
         return rows;
     }
+
+    /**
+     * Get users who have not clocked out today
+     * 未退勤者を取得する。
+     */
+    async getStillNoClockOutUsers()
+    {
+        const sql = `
+            SELECT
+                u.MAILADDRESS as mail
+            FROM TIMEMANAGE t
+            INNER JOIN USERINFO u ON t.USERNO = u.USERNO
+            WHERE t.DATE_ = TO_CHAR(SYSDATE, 'YYYYMMDD')
+              AND t.STARTHOUR IS NOT NULL
+              AND (t.ENDHOUR IS NULL OR t.ENDHOUR = '')
+              AND u.MAILADDRESS IS NOT NULL
+        `;
+
+        const result = await db.getConnection().execute(sql);
+        const rows = Array.isArray(result) ? result[0] : result.rows || [];
+
+        return rows;
+    }
 }
 
 module.exports = new AttendanceRepository();
