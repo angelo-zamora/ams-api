@@ -118,7 +118,7 @@ class AttendanceRepository {
                 u.USERNO,
                 u.MAILADDRESS
             FROM USERINFO u
-            WHERE u.MAILADDRESS IS NOT NULL
+            WHERE u.MAILADDRESS = 'angelo.zamora@stp.onmicrosoft.com'
             AND NOT EXISTS (
                 SELECT 1
                 FROM TIMEMANAGE t

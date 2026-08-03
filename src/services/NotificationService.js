@@ -134,24 +134,28 @@ class NotificationService {
         const users = await attendanceRepository.getNoClockInUsersToday();
         
         console.log(`Sending new card reminder to ${users.length} employees.`);
-        
-        const message = constants.NOTIFICATIONS.DAILY_CLOCK_IN_REMINDER;
 
         for (const user of users) {
             const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
             console.log(`To: ${email}`);
-            console.log(`Message: ${message}`);
             
             try {
                 if (email) {
                     const objectId = await graphService.getUserObjectId(email);
                     if (objectId) {
-                        await botService.sendProactiveMessage(objectId, message);
-                        console.log(`Successfully sent proactive Teams message to: ${email}`);
+                        // Delegate the reminder to the Teams Bot's internal endpoint.
+                        // The bot will send the morning greeting + clock action card.
+                        await botService.sendReminderToBot(
+                            objectId,
+                            constants.NOTIFICATIONS.DAILY_CLOCK_IN_REMINDER,
+                            process.env.AZURE_TENANT_ID,
+                            'ja-JP'
+                        );
+                        console.log(`Successfully sent DAILY_CLOCK_IN_REMINDER to: ${email}`);
                     }
                 }
             } catch (error) {
-                console.error(`Failed to send proactive Teams message to ${email}:`, error.message);
+                console.error(`Failed to send DAILY_CLOCK_IN_REMINDER to ${email}:`, error.message);
             }
         }
     }
