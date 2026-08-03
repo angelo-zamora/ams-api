@@ -44,8 +44,6 @@ class NotificationService {
         const users = await overtimeRepository.getUsersOnOvertimeStillClockedIn();
         
         console.log(`Sending clock out Overtime reminder to ${users.length} employees.`);
-        
-        const message = constants.NOTIFICATIONS.OVERTIME_CLOCK_OUT_REMINDER;
 
         for (const user of users) {
                 const otStart = new Date();
@@ -61,14 +59,20 @@ class NotificationService {
                 if (diffMinutes >= 180) {
                     const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
                     console.log(`To: ${email}`);
-                    console.log(`Message: ${message}`);
                     
                     try {
                         if (email) {
                             const objectId = await graphService.getUserObjectId(email);
                             if (objectId) {
-                                await botService.sendProactiveMessage(objectId, message);
-                                console.log(`Successfully sent proactive Teams message to: ${email}`);
+                                // Delegate the reminder to the Teams Bot's internal endpoint.
+                                // The bot will send the morning greeting + clock action card.
+                                await botService.sendReminderToBot(
+                                    objectId,
+                                    constants.NOTIFICATIONS.OVERTIME_CLOCK_OUT_REMINDER,
+                                    process.env.AZURE_TENANT_ID,
+                                    'ja-JP'
+                                );
+                                console.log(`Successfully sent OVERTIME_CLOCK_OUT_REMINDER to: ${email}`);
                             }
                         }
                     } catch (error) {
@@ -108,20 +112,24 @@ class NotificationService {
         const users = await attendanceRepository.getStillNoClockOutUsers();
         
         console.log(`Sending clock out reminder to ${users.length} employees.`);
-        
-        const message = constants.NOTIFICATIONS.NO_CLOCK_OUT_REMINDER;
 
         for (const user of users) {
             const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
             console.log(`To: ${email}`);
-            console.log(`Message: ${message}`);
             
             try {
                 if (email) {
                     const objectId = await graphService.getUserObjectId(email);
                     if (objectId) {
-                        await botService.sendProactiveMessage(objectId, message);
-                        console.log(`Successfully sent proactive Teams message to: ${email}`);
+                        // Delegate the reminder to the Teams Bot's internal endpoint.
+                        // The bot will send the morning greeting + clock action card.
+                        await botService.sendReminderToBot(
+                            objectId,
+                            constants.NOTIFICATIONS.NO_CLOCK_OUT_REMINDER,
+                            process.env.AZURE_TENANT_ID,
+                            'ja-JP'
+                        );
+                        console.log(`Successfully sent NO_CLOCK_OUT_REMINDER to: ${email}`);
                     }
                 }
             } catch (error) {
