@@ -8,6 +8,11 @@ const graphConfig = require("../config/GraphConfig");
  */
 class GraphService {
 
+    constructor() {
+        this.appOnlyClient = null;
+        this.objectIdCache = new Map();
+    }
+
     /**
      * Current Logged In User
      */
@@ -52,36 +57,56 @@ class GraphService {
     }
 
     /**
-     * Get an App-Only Graph Client using Client Secret
+     * Get an App-Only Graph Client using Client Secret (Singleton reuse)
      */
     getAppOnlyClient() {
-        const { ClientSecretCredential } = require("@azure/identity");
-        const { TokenCredentialAuthenticationProvider } = require("@microsoft/microsoft-graph-client/authProviders/azureTokenCredentials");
-        const { Client } = require("@microsoft/microsoft-graph-client");
-        
-        const credential = new ClientSecretCredential(
-            graphConfig.tenantId,
-            graphConfig.clientId,
-            graphConfig.clientSecret
-        );
+        if (!this.appOnlyClient) {
+            const { ClientSecretCredential } = require("@azure/identity");
+            const { TokenCredentialAuthenticationProvider } = require("@microsoft/microsoft-graph-client/authProviders/azureTokenCredentials");
+            const { Client } = require("@microsoft/microsoft-graph-client");
+            
+            const credential = new ClientSecretCredential(
+                graphConfig.tenantId,
+                graphConfig.clientId,
+                graphConfig.clientSecret
+            );
 
-        const authProvider = new TokenCredentialAuthenticationProvider(credential, {
-            scopes: ["https://graph.microsoft.com/.default"]
-        });
+            const authProvider = new TokenCredentialAuthenticationProvider(credential, {
+                scopes: ["https://graph.microsoft.com/.default"]
+            });
 
-        return Client.initWithMiddleware({ authProvider });
+            this.appOnlyClient = Client.initWithMiddleware({ authProvider });
+        }
+
+        return this.appOnlyClient;
     }
 
     /**
-     * Get User Object ID via Graph API
+     * Get User Object ID via Graph API with memory caching
      */
     async getUserObjectId(email) {
-        const client = this.getAppOnlyClient();
+        if (!email) return null;
+        const normalizedEmail = email.toLowerCase().trim();
 
-        // Get the target user's Graph Object ID using their email
-        const user = await client.api(`/users/${email}`).get();
+        if (this.objectIdCache.has(normalizedEmail)) {
+            return this.objectIdCache.get(normalizedEmail);
+        }
 
-        return user.id;
+        try {
+            const client = this.getAppOnlyClient();
+
+            // Select only necessary field 'id' to optimize response size
+            const user = await client.api(`/users/${normalizedEmail}`).select("id").get();
+
+            if (user && user.id) {
+                this.objectIdCache.set(normalizedEmail, user.id);
+                return user.id;
+            }
+        } catch (error) {
+            console.error(`[GraphService] Error fetching object ID for ${email}:`, error.message);
+        }
+
+        return null;
     }
 }
 

@@ -14,6 +14,35 @@ const constants = require("../helpers/Constants");
 
 class NotificationService {
 
+    /**
+     * Executes an array of async tasks with controlled concurrency.
+     * @param {Array} items - List of items to process
+     * @param {number} concurrency - Maximum parallel tasks (default 10)
+     * @param {Function} workerFn - Async function to execute per item
+     */
+    async processConcurrently(items, concurrency = 10, workerFn) {
+        if (!items || items.length === 0) return [];
+        const concurrencyLimit = Math.max(1, Number(process.env.NOTIFICATION_CONCURRENCY) || concurrency);
+
+        const executing = new Set();
+        const results = [];
+
+        for (const item of items) {
+            const p = Promise.resolve().then(() => workerFn(item));
+            results.push(p);
+            executing.add(p);
+
+            const clean = () => executing.delete(p);
+            p.then(clean, clean);
+
+            if (executing.size >= concurrencyLimit) {
+                await Promise.race(executing);
+            }
+        }
+
+        return Promise.allSettled(results);
+    }
+
     async notifyClockOutReminder() {
         const users = await attendanceRepository.getStillClockedInUsers();
         
@@ -21,10 +50,8 @@ class NotificationService {
         
         const message = constants.NOTIFICATIONS.CLOCK_OUT_REMINDER;
 
-        for (const user of users) {
+        await this.processConcurrently(users, 10, async (user) => {
             const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
-            console.log(`To: ${email}`);
-            console.log(`Message: ${message}`);
             
             try {
                 if (email) {
@@ -37,7 +64,7 @@ class NotificationService {
             } catch (error) {
                 console.error(`Failed to send proactive Teams message to ${email}:`, error.message);
             }
-        }
+        });
     }
 
     async notifyOvertimeClockOutReminder() {
@@ -45,70 +72,65 @@ class NotificationService {
         
         console.log(`Sending clock out Overtime reminder to ${users.length} employees.`);
 
-        for (const user of users) {
-                const now = dateHelper.now();
+        await this.processConcurrently(users, 10, async (user) => {
+            const now = dateHelper.now();
 
-                // OT Start
-                const otStart = new Date(now);
-                otStart.setHours(
-                    Number(user.OT_STARTHOUR),
-                    Number(user.OT_STARTMIN),
-                    0,
-                    0
-                );
+            // OT Start
+            const otStart = new Date(now);
+            otStart.setHours(
+                Number(user.OT_STARTHOUR),
+                Number(user.OT_STARTMIN),
+                0,
+                0
+            );
 
-                // OT End (approved duration)
-                const otEnd = new Date(now);
-                otEnd.setHours(
-                    Number(user.OT_ENDHOUR),
-                    Number(user.OT_ENDMIN),
-                    0,
-                    0
-                );
+            // OT End (approved duration)
+            const otEnd = new Date(now);
+            otEnd.setHours(
+                Number(user.OT_ENDHOUR),
+                Number(user.OT_ENDMIN),
+                0,
+                0
+            );
 
-                // Handle OT crossing midnight (e.g. 22:00 - 01:00)
-                if (otEnd < otStart) {
-                    otEnd.setDate(otEnd.getDate() + 1);
-                }
+            // Handle OT crossing midnight (e.g. 22:00 - 01:00)
+            if (otEnd < otStart) {
+                otEnd.setDate(otEnd.getDate() + 1);
+            }
 
-                // Total approved OT duration
-                const totalMinutes = Math.floor(
-                    (otEnd.getTime() - otStart.getTime()) / 60000
-                );
+            // Total approved OT duration
+            const totalMinutes = Math.floor(
+                (otEnd.getTime() - otStart.getTime()) / 60000
+            );
 
-                // Elapsed OT time
-                const elapsedMinutes = Math.floor(
-                    (now.getTime() - otStart.getTime()) / 60000
-                );
+            // Elapsed OT time
+            const elapsedMinutes = Math.floor(
+                (now.getTime() - otStart.getTime()) / 60000
+            );
 
-                // Trigger once greater than or equal to the approved OT duration
-                if (elapsedMinutes >= totalMinutes) {
-                    const totalHours = Math.floor(totalMinutes / 60);
-                    const remainingMinutes = totalMinutes % 60;
-
-                    const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
-                    console.log(`To: ${email}`);
-                    
-                    try {
-                        if (email) {
-                            const objectId = await graphService.getUserObjectId(email);
-                            if (objectId) {
-                                // Delegate the reminder to the Teams Bot's internal endpoint.
-                                // The bot will send the morning greeting + clock action card.
-                                await botService.sendReminderToBot(
-                                    objectId,
-                                    constants.NOTIFICATIONS.OVERTIME_CLOCK_OUT_REMINDER,
-                                    process.env.AZURE_TENANT_ID,
-                                    'ja-JP'
-                                );
-                                console.log(`Successfully sent OVERTIME_CLOCK_OUT_REMINDER to: ${email}`);
-                            }
+            // Trigger once greater than or equal to the approved OT duration
+            if (elapsedMinutes >= totalMinutes) {
+                const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
+                
+                try {
+                    if (email) {
+                        const objectId = await graphService.getUserObjectId(email);
+                        if (objectId) {
+                            // Delegate the reminder to the Teams Bot's internal endpoint.
+                            await botService.sendReminderToBot(
+                                objectId,
+                                constants.NOTIFICATIONS.OVERTIME_CLOCK_OUT_REMINDER,
+                                process.env.AZURE_TENANT_ID,
+                                'ja-JP'
+                            );
+                            console.log(`Successfully sent OVERTIME_CLOCK_OUT_REMINDER to: ${email}`);
                         }
-                    } catch (error) {
-                        console.error(`Failed to send proactive Teams message to ${email}:`, error.message);
                     }
+                } catch (error) {
+                    console.error(`Failed to send proactive Teams message to ${email}:`, error.message);
                 }
-        }
+            }
+        });
     }
 
     async notifyNoClockinReminder() {
@@ -118,10 +140,8 @@ class NotificationService {
         
         const message = constants.NOTIFICATIONS.NO_CLOCK_IN_REMINDER;
 
-        for (const user of users) {
+        await this.processConcurrently(users, 10, async (user) => {
             const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
-            console.log(`To: ${email}`);
-            console.log(`Message: ${message}`);
             
             try {
                 if (email) {
@@ -134,7 +154,7 @@ class NotificationService {
             } catch (error) {
                 console.error(`Failed to send proactive Teams message to ${email}:`, error.message);
             }
-        }
+        });
     }
 
     async notifyNoClockOutReminder() {
@@ -142,16 +162,14 @@ class NotificationService {
         
         console.log(`Sending clock out reminder to ${users.length} employees.`);
 
-        for (const user of users) {
+        await this.processConcurrently(users, 10, async (user) => {
             const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
-            console.log(`To: ${email}`);
             
             try {
                 if (email) {
                     const objectId = await graphService.getUserObjectId(email);
                     if (objectId) {
                         // Delegate the reminder to the Teams Bot's internal endpoint.
-                        // The bot will send the morning greeting + clock action card.
                         await botService.sendReminderToBot(
                             objectId,
                             constants.NOTIFICATIONS.NO_CLOCK_OUT_REMINDER,
@@ -164,7 +182,7 @@ class NotificationService {
             } catch (error) {
                 console.error(`Failed to send proactive Teams message to ${email}:`, error.message);
             }
-        }
+        });
     }
 
     async notifyToClockinReminder() {
@@ -172,16 +190,14 @@ class NotificationService {
         
         console.log(`Sending new card reminder to ${users.length} employees.`);
 
-        for (const user of users) {
+        await this.processConcurrently(users, 10, async (user) => {
             const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
-            console.log(`To: ${email}`);
             
             try {
                 if (email) {
                     const objectId = await graphService.getUserObjectId(email);
                     if (objectId) {
                         // Delegate the reminder to the Teams Bot's internal endpoint.
-                        // The bot will send the morning greeting + clock action card.
                         await botService.sendReminderToBot(
                             objectId,
                             constants.NOTIFICATIONS.DAILY_CLOCK_IN_REMINDER,
@@ -194,7 +210,7 @@ class NotificationService {
             } catch (error) {
                 console.error(`Failed to send DAILY_CLOCK_IN_REMINDER to ${email}:`, error.message);
             }
-        }
+        });
     }
 }
 
