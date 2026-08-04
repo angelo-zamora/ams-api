@@ -46,7 +46,10 @@ class NotificationService {
         console.log(`Sending clock out Overtime reminder to ${users.length} employees.`);
 
         for (const user of users) {
-                const otStart = new Date();
+                const now = dateHelper.now();
+
+                // OT Start
+                const otStart = new Date(now);
                 otStart.setHours(
                     Number(user.OT_STARTHOUR),
                     Number(user.OT_STARTMIN),
@@ -54,9 +57,35 @@ class NotificationService {
                     0
                 );
 
-                const diffMinutes = Math.floor((dateHelper.now() - otStart) / 60000);
+                // OT End (approved duration)
+                const otEnd = new Date(now);
+                otEnd.setHours(
+                    Number(user.OT_ENDHOUR),
+                    Number(user.OT_ENDMIN),
+                    0,
+                    0
+                );
 
-                if (diffMinutes >= 180) {
+                // Handle OT crossing midnight (e.g. 22:00 - 01:00)
+                if (otEnd < otStart) {
+                    otEnd.setDate(otEnd.getDate() + 1);
+                }
+
+                // Total approved OT duration
+                const totalMinutes = Math.floor(
+                    (otEnd.getTime() - otStart.getTime()) / 60000
+                );
+
+                // Elapsed OT time
+                const elapsedMinutes = Math.floor(
+                    (now.getTime() - otStart.getTime()) / 60000
+                );
+
+                // Trigger once greater than or equal to the approved OT duration
+                if (elapsedMinutes >= totalMinutes) {
+                    const totalHours = Math.floor(totalMinutes / 60);
+                    const remainingMinutes = totalMinutes % 60;
+
                     const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
                     console.log(`To: ${email}`);
                     
