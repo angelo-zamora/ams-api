@@ -45,14 +45,14 @@ class NotificationService {
 
     async notifyClockOutReminder() {
         const users = await attendanceRepository.getStillClockedInUsers();
-        
+
         console.log(`Sending clock out reminder to ${users.length} employees.`);
-        
+
         const message = constants.NOTIFICATIONS.CLOCK_OUT_REMINDER;
 
         await this.processConcurrently(users, 10, async (user) => {
             const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
-            
+
             try {
                 if (email) {
                     const objectId = await graphService.getUserObjectId(email);
@@ -69,49 +69,21 @@ class NotificationService {
 
     async notifyOvertimeClockOutReminder() {
         const users = await overtimeRepository.getUsersOnOvertimeStillClockedIn();
-        
+
         console.log(`Sending clock out Overtime reminder to ${users.length} employees.`);
 
         await this.processConcurrently(users, 10, async (user) => {
             const now = dateHelper.now();
 
-            // OT Start
-            const otStart = new Date(now);
+            const otStart = new Date();
             otStart.setHours(
                 Number(user.OT_STARTHOUR),
-                Number(user.OT_STARTMIN),
-                0,
-                0
-            );
+                Number(user.OT_STARTMIN), 0, 0);
 
-            // OT End (approved duration)
-            const otEnd = new Date(now);
-            otEnd.setHours(
-                Number(user.OT_ENDHOUR),
-                Number(user.OT_ENDMIN),
-                0,
-                0
-            );
-
-            // Handle OT crossing midnight (e.g. 22:00 - 01:00)
-            if (otEnd < otStart) {
-                otEnd.setDate(otEnd.getDate() + 1);
-            }
-
-            // Total approved OT duration
-            const totalMinutes = Math.floor(
-                (otEnd.getTime() - otStart.getTime()) / 60000
-            );
-
-            // Elapsed OT time
-            const elapsedMinutes = Math.floor(
-                (now.getTime() - otStart.getTime()) / 60000
-            );
-
-            // Trigger once greater than or equal to the approved OT duration
-            if (elapsedMinutes >= totalMinutes) {
+            const diffMinutes = Math.floor((dateHelper.now() - otStart) / 60000);
+            if (diffMinutes >= 180 && diffMinutes < 185) {
                 const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
-                
+
                 try {
                     if (email) {
                         const objectId = await graphService.getUserObjectId(email);
@@ -135,14 +107,14 @@ class NotificationService {
 
     async notifyNoClockinReminder() {
         const users = await attendanceRepository.getNoClockInUsers();
-        
+
         console.log(`Sending no clock in reminder to ${users.length} employees.`);
-        
+
         const message = constants.NOTIFICATIONS.NO_CLOCK_IN_REMINDER;
 
         await this.processConcurrently(users, 10, async (user) => {
             const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
-            
+
             try {
                 if (email) {
                     const objectId = await graphService.getUserObjectId(email);
@@ -159,12 +131,12 @@ class NotificationService {
 
     async notifyNoClockOutReminder() {
         const users = await attendanceRepository.getStillNoClockOutUsers();
-        
+
         console.log(`Sending clock out reminder to ${users.length} employees.`);
 
         await this.processConcurrently(users, 10, async (user) => {
             const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
-            
+
             try {
                 if (email) {
                     const objectId = await graphService.getUserObjectId(email);
@@ -187,12 +159,12 @@ class NotificationService {
 
     async notifyToClockinReminder() {
         const users = await attendanceRepository.getNoClockInUsersToday();
-        
+
         console.log(`Sending new card reminder to ${users.length} employees.`);
 
         await this.processConcurrently(users, 10, async (user) => {
             const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
-            
+
             try {
                 if (email) {
                     const objectId = await graphService.getUserObjectId(email);
