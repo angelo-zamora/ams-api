@@ -21,7 +21,10 @@ class AttendanceRepository {
             *
             FROM TIMEMANAGE
             WHERE USERNO = :1
-              AND DATE_ = TO_CHAR(SYSDATE, 'YYYYMMDD')
+              AND DATE_ = TO_CHAR(
+                    SYSTIMESTAMP AT TIME ZONE 'Asia/Manila',
+                    'YYYYMMDD'
+                )
             AND ROWNUM = 1
         `;
 
@@ -43,7 +46,10 @@ class AttendanceRepository {
                 u.MAILADDRESS as mail
             FROM TIMEMANAGE t
             INNER JOIN USERINFO u ON t.USERNO = u.USERNO
-            WHERE t.DATE_ = TO_CHAR(SYSDATE, 'YYYYMMDD')
+            WHERE t.DATE_ = TO_CHAR(
+                    SYSTIMESTAMP AT TIME ZONE 'Asia/Manila',
+                    'YYYYMMDD'
+                )
               AND t.STARTHOUR IS NOT NULL
               AND (t.ENDHOUR IS NULL OR t.ENDHOUR = '')
               AND u.MAILADDRESS IS NOT NULL
@@ -77,7 +83,10 @@ class AttendanceRepository {
                 SELECT 1
                 FROM TIMEMANAGE t
                 WHERE t.USERNO = u.USERNO
-                AND t.DATE_ = TO_CHAR(SYSDATE, 'YYYYMMDD')
+                AND t.DATE_ = TO_CHAR(
+                    SYSTIMESTAMP AT TIME ZONE 'Asia/Manila',
+                    'YYYYMMDD'
+                )
                 AND t.STARTHOUR IS NOT NULL
             )
         `;
@@ -99,7 +108,10 @@ class AttendanceRepository {
                 u.MAILADDRESS as mail
             FROM TIMEMANAGE t
             INNER JOIN USERINFO u ON t.USERNO = u.USERNO
-            WHERE t.DATE_ = TO_CHAR(SYSDATE, 'YYYYMMDD')
+            WHERE t.DATE_ = TO_CHAR(
+                    SYSTIMESTAMP AT TIME ZONE 'Asia/Manila',
+                    'YYYYMMDD'
+                )
               AND t.STARTHOUR IS NOT NULL
               AND (t.ENDHOUR IS NULL OR t.ENDHOUR = '')
               AND u.MAILADDRESS IS NOT NULL
@@ -123,7 +135,10 @@ class AttendanceRepository {
                 SELECT 1
                 FROM TIMEMANAGE t
                 WHERE t.USERNO = u.USERNO
-                AND t.DATE_ = TO_CHAR(SYSDATE, 'YYYYMMDD')
+                AND t.DATE_ = TO_CHAR(
+                    SYSTIMESTAMP AT TIME ZONE 'Asia/Manila',
+                    'YYYYMMDD'
+                )
                 AND t.STARTHOUR IS NOT NULL
             )
         `;

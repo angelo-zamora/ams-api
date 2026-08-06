@@ -58,7 +58,10 @@ class OvertimeRepository {
             INNER JOIN ZANGYOU o
                 ON o.USERNO = t.USERNO
             AND o.REQDATE = t.DATE_
-            WHERE t.DATE_ = TO_CHAR(SYSDATE, 'YYYYMMDD')
+            WHERE t.DATE_ = TO_CHAR(
+                    SYSTIMESTAMP AT TIME ZONE 'Asia/Manila',
+                    'YYYYMMDD'
+                )
             AND t.STARTHOUR IS NOT NULL
             AND (t.ENDHOUR IS NULL OR t.ENDHOUR = '')
             AND u.MAILADDRESS IS NOT NULL
