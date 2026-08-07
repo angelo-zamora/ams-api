@@ -55,47 +55,27 @@ class BotService {
         const url = `${botEndpoint}/api/reminders/trigger`;
         const body = JSON.stringify({ reminderType, userObjectId, tenantId, locale });
 
-        const MAX_ATTEMPTS = 3;
-        let lastError;
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey,
+                },
+                body,
+            });
 
-        for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-api-key': apiKey,
-                    },
-                    body,
-                });
-
-                if (response.ok) {
-                    console.log(`[BotService] ✅ Reminder sent: ${reminderType} → ${userObjectId}`);
-                    return;
-                }
-
-                // 4xx errors: do not retry (bad request / unauthorized / not found)
-                if (response.status < 500) {
-                    const text = await response.text().catch(() => '');
-                    console.error(`[BotService] ❌ Reminder failed (${response.status}, no retry): ${reminderType} → ${userObjectId}. Response: ${text}`);
-                    return;
-                }
-
-                // 5xx: transient, will retry
-                lastError = new Error(`HTTP ${response.status}`);
-                console.warn(`[BotService] ⚠️ Reminder attempt ${attempt}/${MAX_ATTEMPTS} failed (${response.status}), retrying...`);
-            } catch (err) {
-                lastError = err;
-                console.warn(`[BotService] ⚠️ Reminder attempt ${attempt}/${MAX_ATTEMPTS} threw an error: ${err.message}, retrying...`);
+            if (response.ok) {
+                console.log(`[BotService] ✅ Reminder sent: ${reminderType} → ${userObjectId}`);
+                return;
             }
 
-            if (attempt < MAX_ATTEMPTS) {
-                await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // 1s, 2s
-            }
+            const text = await response.text().catch(() => '');
+            console.error(`[BotService] ❌ Reminder failed (${response.status}): ${reminderType} → ${userObjectId}. Response: ${text}`);
+        } catch (err) {
+            console.error(`[BotService] ❌ Reminder failed with error: ${err.message} for ${reminderType} → ${userObjectId}`);
+            throw err;
         }
-
-        console.error(`[BotService] ❌ All ${MAX_ATTEMPTS} attempts failed for ${reminderType} → ${userObjectId}:`, lastError?.message);
-        throw lastError;
     }
 }
-module.exports = new BotService();
+module.exports = new BotService();
