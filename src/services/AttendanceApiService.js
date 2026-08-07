@@ -80,6 +80,36 @@ class AttendanceApiService {
     }
 
     /**
+     * Request employee's leave data from the attendance API.
+     * 従業員の休暇データを勤怠管理APIから取得します。
+     * @param {Object} employee - The employee object containing USERNO and PASSWORD.
+     * @param {Object} payload - The payload to send to the API.
+     * @returns {Promise<Object>} - The response from the attendance API.
+     */
+    async leave(employee) {
+        try {
+            const password = apiHelper.resolvePassword(employee);
+            if (!employee?.USERNO || !password) {
+                throw new Error("Employee credentials are required for leave request API.");
+            }
+
+            payload.userNo = employee.USERNO;
+
+            const token = await apiHelper.getValidToken({ ...employee, PASSWORD: password });
+            const response = await this._requestLeaveApi(token, "/kintai/setKintai", payload);
+
+            if (response.statusCode >= 400) {
+                throw new Error(response.body?.message);
+            }
+
+            return response;
+        } catch (error) {
+            logger.error(error);
+            throw error;
+        }
+    }
+
+    /**
      * Request employee's attendance data from the attendance API.
      * 従業員の勤怠データを勤怠管理APIから取得します。
      * @private
@@ -97,6 +127,27 @@ class AttendanceApiService {
             }
         });
     }
+
+    /**
+     * Request employee's leave data from the attendance API.
+     * 従業員の休暇データを勤怠管理APIから取得します。
+     * @private
+    */
+    async _requestLeaveApi(token, $endpoint, payload) {
+            const url = apiHelper.buildUrl(
+                `${$endpoint}`
+            );
+    
+            return apiHelper.requestWithRetry({
+                method: "POST",
+                url,
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+        }
 }
 
 module.exports = new AttendanceApiService();

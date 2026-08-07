@@ -40,6 +40,12 @@ class AttendanceController {
         return new ClockOutResponse(employee, locale);
     }
 
+    async leave(payload, session, locale) {
+        await attendanceService.leave(payload, session, locale);
+
+        return new ClockOutResponse(null, locale);
+    }
+
     /**
      * Get attendance information for the current day.
      * 今日の勤怠情報を取得する。
