@@ -41,7 +41,7 @@ class AttendanceController {
     }
 
     async leave(payload, session, locale) {
-        await attendanceService.leave(payload, session, locale);
+        await attendanceService.leaveRequest(payload, session, locale);
 
         return new ClockOutResponse(null, locale);
     }

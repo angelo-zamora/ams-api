@@ -25,7 +25,9 @@ class LocaleHelper {
                 SERVER_ERROR: "Internal Server Error",
                 ALREADY_OVERTIME_REQ_TODAY: "Already overtime request today.",
                 OVERTIME_COMPLETED: "Overtime Request completed.",
-                OVERTIME_NOT_FOUND: "Overtime not found."
+                OVERTIME_NOT_FOUND: "Overtime not found.",
+                LEAVE_REQUEST_NOT_FOUND: "Leave Request not found.",
+                LEAVE_COMPLETED: "Leave Request completed."
             },
             ja: {
                 CLOCK_IN_COMPLETED: "打刻が完了しました。",
@@ -43,7 +45,9 @@ class LocaleHelper {
                 SERVER_ERROR: "サーバーエラーが発生しました",
                 ALREADY_OVERTIME_REQ_TODAY: "すでに残業申請済みです。",
                 OVERTIME_COMPLETED: "残業申請が完了しました。",
-                OVERTIME_NOT_FOUND: "残業申請が見つかりません。"
+                OVERTIME_NOT_FOUND: "残業申請が見つかりません。",
+                LEAVE_REQUEST_NOT_FOUND: "休暇申請が見つかりません。",
+                LEAVE_COMPLETED: "休暇申請が完了しました。"
             }
         };
     }

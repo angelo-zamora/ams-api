@@ -89,11 +89,27 @@ class AttendanceService {
 
         const employee = await employeeService.validateEmployee(email, locale);
 
-        validator.validateRequest(payload.params);
+        leaveValidator.validateRequest(payload.params);
 
         await attendanceApiService.leave(employee, payload.params);
 
         return null;
+    }
+
+    /**
+     * Get employee overtime request
+     * 従業員の残業申請を取得する。
+     */
+    async getLeaveRequest(session, request, locale) {
+        const email = session.currentUser.email;
+        
+        const employee = await employeeService.validateEmployee(email, locale);
+
+        const leave = await attendanceRepository.getLeave(employee.USERNO, request.params.date_);
+
+        leaveValidator.validateLeave(leave);
+
+        return leave;
     }
 
     /**
