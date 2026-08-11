@@ -46,7 +46,7 @@ module.exports = {
     CLOCK_OUT_REMINDER: "0 0 9 * * 1-5",
 
     // Every 5 minutes from 5:00 PM to 11:55 PM Philippine Time
-    OVERTIME_REMINDER: "0 */5 9-15 * * 1-5",
+    OVERTIME_REMINDER: "0 30 11 * * 1-5",
 
     // 11:59 PM Monday-Friday (PHT)
     NO_CLOCK_OUT_REMINDER: "0 59 15 * * 1-5",
@@ -69,5 +69,17 @@ module.exports = {
         ABSENCE_PRIOR_NOTICE: "10",   // 欠勤
         VACATION_LEAVE: "11",         // 夏休
         ABSENCE_PUBLIC_HOLIDAY: "12"  // 欠勤（公休）
+    },
+
+    LEAVE_STATUS_STRINGS: {
+        1: "有",
+        2: "前半",
+        3: "後半",
+        6: "代",
+        9: "特有",
+        8: "特休",
+        10: "欠勤",
+        11: "夏休",
+        12: "欠勤（公休）"
     }
 };

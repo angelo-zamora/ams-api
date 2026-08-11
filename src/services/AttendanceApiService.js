@@ -86,7 +86,7 @@ class AttendanceApiService {
      * @param {Object} payload - The payload to send to the API.
      * @returns {Promise<Object>} - The response from the attendance API.
      */
-    async leave(employee) {
+    async leave(employee, payload) {
         try {
             const password = apiHelper.resolvePassword(employee);
             if (!employee?.USERNO || !password) {

@@ -1,3 +1,4 @@
+const dateHelper = require("../helpers/DateHelper");
 class OvertimeValidator {
 
     validateExistingOvertime(overtime) {
@@ -83,7 +84,7 @@ class OvertimeValidator {
         }
 
         // Validate current month/year only
-        const today = new Date();
+        const today = dateHelper.now();
 
         if (
             y !== today.getFullYear() ||

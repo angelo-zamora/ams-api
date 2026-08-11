@@ -5,7 +5,7 @@ const dateHelper = require("../helpers/DateHelper");
 /**
  * ============================================
  * Leave Response DTO
- * �ٲ˥쥹�ݥ�
+ * 出勤レスポンス
  * Author: CRESS-INFO Angelo
  * Date: 2026/08/10
  * ============================================
@@ -22,7 +22,7 @@ class LeaveResponse {
 
         this.leave = {
             userNo: leave.userNo,
-            status: leave.status,
+            status: constants.LEAVE_STATUS_STRINGS[leave.status],
             date: dateHelper.formatDate(leave.date_),
             reason: leave.reason
         }

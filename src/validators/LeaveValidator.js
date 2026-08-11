@@ -1,4 +1,4 @@
-const constants = require("../constants");
+const constants = require("../helpers/Constants");
 class LeaveValidator {
 
     validateRequest(request) {
@@ -65,7 +65,7 @@ class LeaveValidator {
         }
     }
 
-    validateLeave(leave) {
+    validateGetLeaveRequest(leave) {
         if (!leave) {
             throw new Error("LEAVE_REQUEST_NOT_FOUND");
         }

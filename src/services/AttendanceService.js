@@ -112,6 +112,18 @@ class AttendanceService {
         return leave;
     }
 
+    async getLeaveRequestByDate(session, date, locale) {
+        const email = session.currentUser.email;
+        
+        const employee = await employeeService.validateEmployee(email, locale);
+
+        const leave = await attendanceRepository.getLeaveRequest(employee.USERNO, date);
+        
+        leaveValidator.validateGetLeaveRequest(leave);
+
+        return leave;
+    }
+
     /**
      * Late Clock In
      */
