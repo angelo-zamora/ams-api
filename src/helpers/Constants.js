@@ -12,6 +12,7 @@ module.exports = {
         CLOCK_IN_SUCCESS: "CLOCK_IN_SUCCESS",
         CLOCK_OUT_SUCCESS: "CLOCK_OUT_SUCCESS",
         OVERTIME_SUCCESS: "OVERTIME_COMPLETED",
+        LEAVE_REQUEST_SUCCESS: "LEAVE_REQUEST_SUCCESS",
         SUCCESS: "SUCCESS",
     },
 
@@ -56,5 +57,29 @@ module.exports = {
     // 7:59 AM Philippine Time Monday-Friday
     // In UTC this is 11:59 PM on the previous day,
     // so Sunday-Thursday UTC corresponds to Monday-Friday PHT.
-    NO_CLOCK_IN_REMINDER: "0 59 23 * * 0-4"
+    NO_CLOCK_IN_REMINDER: "0 59 23 * * 0-4",
+
+    LEAVE_STATUSES: {
+        PAID_LEAVE: "1",              // 有
+        AM_LEAVE: "2",                // 前半
+        PM_LEAVE: "3",                // 後半
+        COMPENSATORY: "6",            // 代
+        SPECIAL_PAID_LEAVE: "9",      // 特有
+        SPECIAL_LEAVE: "8",           // 特休
+        ABSENCE_PRIOR_NOTICE: "10",   // 欠勤
+        VACATION_LEAVE: "11",         // 夏休
+        ABSENCE_PUBLIC_HOLIDAY: "12"  // 欠勤（公休）
+    },
+
+    LEAVE_STATUS_STRINGS: {
+        1: "有",
+        2: "前半",
+        3: "後半",
+        6: "代",
+        9: "特有",
+        8: "特休",
+        10: "欠勤",
+        11: "夏休",
+        12: "欠勤（公休）"
+    }
 };

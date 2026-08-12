@@ -1,6 +1,7 @@
 const attendanceService = require("../services/AttendanceService");
 const ClockInResponse = require("../dto/ClockInResponse");
 const ClockOutResponse = require("../dto/ClockOutResponse");
+const LeaveResponse = require("../dto/LeaveResponse");
 const AttendanceTodayResponse = require("../dto/AttendanceTodayResponse");
 const constants = require("../helpers/Constants");
 
@@ -41,6 +42,20 @@ class AttendanceController {
     }
 
     /**
+     * Request leave for an employee.
+     * 従業員の休暇を申請する。
+     * @param {Object} payload - The payload to send to the API.
+     * @param {Object} session - The session object containing user information.
+     * @param {string} locale - The locale for response messages.
+     * @returns {Promise<LeaveResponse>} - The response containing employee information after clocking in.
+     */
+    async leave(payload, session, locale) {
+        await attendanceService.leaveRequest(payload, session, locale);
+
+        return new LeaveResponse(null, locale);
+    }
+
+    /**
      * Get attendance information for the current day.
      * 今日の勤怠情報を取得する。
      * @param {Object} session - The session object containing user information.
@@ -51,6 +66,12 @@ class AttendanceController {
         const attendance = await attendanceService.getAttendanceToday(session);
 
         return new AttendanceTodayResponse(attendance, locale);
+    }
+
+    async getLeaveRequestByDate(session, date, locale) {
+        const leave = await attendanceService.getLeaveRequestByDate(session, date, locale);
+
+        return new LeaveResponse(leave, locale);
     }
 }
 

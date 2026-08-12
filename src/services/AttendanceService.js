@@ -5,6 +5,7 @@ const dateHelper = require("../helpers/DateHelper");
 const constants = require("../helpers/Constants");
 const attendanceApiService = require("./AttendanceApiService");
 const validator = require("../validators/AttendanceValidator");
+const leaveValidator = require("../validators/LeaveValidator");
 
 /**
  * ============================================
@@ -51,8 +52,8 @@ class AttendanceService {
 
         validator.validateClockOut(attendance);
 
-        const lateClockin = this.lateClockIn(dateHelper.parseDateTime(attendance.date_, `${attendance.startHour}:${attendance.startMin}`)) 
-                    ? constants.WARNING.LATE_CLOCK_IN : null;
+        const lateClockin = this.lateClockIn(dateHelper.parseDateTime(attendance.date_, `${attendance.startHour}:${attendance.startMin}`))
+            ? constants.WARNING.LATE_CLOCK_IN : null;
 
         attendance.lateClockin = lateClockin;
 
@@ -73,10 +74,54 @@ class AttendanceService {
 
         validator.validateTodayAttendance(attendance);
 
-        attendance.lateClockIn = this.lateClockIn(dateHelper.parseDateTime(attendance.date_, `${attendance.startHour}:${attendance.startMin}`)) 
-                    ? constants.WARNING.LATE_CLOCK_IN : null;
+        attendance.lateClockIn = this.lateClockIn(dateHelper.parseDateTime(attendance.date_, `${attendance.startHour}:${attendance.startMin}`))
+            ? constants.WARNING.LATE_CLOCK_IN : null;
 
         return attendance;
+    }
+
+    /**
+     * Leave Request
+     */
+    async leaveRequest(payload, session, locale) {
+
+        const email = session.currentUser.email;
+
+        const employee = await employeeService.validateEmployee(email, locale);
+
+        leaveValidator.validateRequest(payload.params);
+
+        await attendanceApiService.leave(employee, payload.params);
+
+        return null;
+    }
+
+    /**
+     * Get employee overtime request
+     * 従業員の残業申請を取得する。
+     */
+    async getLeaveRequest(session, request, locale) {
+        const email = session.currentUser.email;
+        
+        const employee = await employeeService.validateEmployee(email, locale);
+
+        const leave = await attendanceRepository.getLeave(employee.USERNO, request.params.date_);
+
+        leaveValidator.validateLeave(leave);
+
+        return leave;
+    }
+
+    async getLeaveRequestByDate(session, date, locale) {
+        const email = session.currentUser.email;
+        
+        const employee = await employeeService.validateEmployee(email, locale);
+
+        const leave = await attendanceRepository.getLeaveRequest(employee.USERNO, date);
+        
+        leaveValidator.validateGetLeaveRequest(leave);
+
+        return leave;
     }
 
     /**
@@ -86,7 +131,7 @@ class AttendanceService {
 
         return clockInTime.getHours() > constants.LATE_CLOCK_IN.HOUR ||
             (clockInTime.getHours() === constants.LATE_CLOCK_IN.HOUR &&
-            clockInTime.getMinutes() >= constants.LATE_CLOCK_IN.MINUTE);
+                clockInTime.getMinutes() >= constants.LATE_CLOCK_IN.MINUTE);
     }
 }
 
