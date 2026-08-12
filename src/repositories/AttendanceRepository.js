@@ -21,7 +21,6 @@ class AttendanceRepository {
             *
             FROM TIMEMANAGE
             WHERE USERNO = :1
-              AND STATUS = 0
               AND DATE_ = TO_CHAR(
                     SYSTIMESTAMP AT TIME ZONE 'Asia/Manila',
                     'YYYYMMDD'

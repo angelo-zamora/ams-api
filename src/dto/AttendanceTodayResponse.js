@@ -17,10 +17,10 @@ class AttendanceTodayResponse {
 
         this.attendance = {
             userNo: attendance.userNo,
-            clockin: dateHelper.datetime(
+            clockin: attendance.startHour ? dateHelper.datetime(
                 dateHelper.parseDateTime(
                     attendance.date_, `${attendance.startHour}:${attendance.startMin}`)
-            ),
+            ) : null,
             clockout: attendance.endHour ?dateHelper.datetime(
                 dateHelper.parseDateTime(
                     attendance.date_, `${attendance.endHour}:${attendance.endMin}`)

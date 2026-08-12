@@ -46,7 +46,7 @@ module.exports = {
     CLOCK_OUT_REMINDER: "0 0 9 * * 1-5",
 
     // Every 5 minutes from 5:00 PM to 11:55 PM Philippine Time
-    OVERTIME_REMINDER: "0 */5 9 * * 1-5",
+    OVERTIME_REMINDER: "0 */5 9-15 * * 1-5",
 
     // 11:59 PM Monday-Friday (PHT)
     NO_CLOCK_OUT_REMINDER: "0 59 15 * * 1-5",
