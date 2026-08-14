@@ -52,11 +52,6 @@ class AttendanceService {
 
         validator.validateClockOut(attendance);
 
-        const lateClockin = this.lateClockIn(dateHelper.parseDateTime(attendance.date_, `${attendance.startHour}:${attendance.startMin}`))
-            ? constants.WARNING.LATE_CLOCK_IN : null;
-
-        attendance.lateClockin = lateClockin;
-
         attendanceApiService.clockOut(employee);
 
         return attendance;
@@ -74,8 +69,14 @@ class AttendanceService {
 
         validator.validateTodayAttendance(attendance);
 
-        attendance.lateClockIn = this.lateClockIn(dateHelper.parseDateTime(attendance.date_, `${attendance.startHour}:${attendance.startMin}`))
-            ? constants.WARNING.LATE_CLOCK_IN : null;
+        const lateClockin = this.isLateClockIn(
+            attendance.startHour,
+            attendance.startMin
+        )
+            ? constants.WARNING.LATE_CLOCK_IN
+            : null;
+
+        attendance.lateClockIn = lateClockin;
 
         return attendance;
     }
@@ -125,13 +126,15 @@ class AttendanceService {
     }
 
     /**
-     * Late Clock In
+     * Is late clock in
      */
-    lateClockIn(clockInTime) {
+    isLateClockIn(hour, minute) {
+        hour = Number(hour);
+        minute = Number(minute);
 
-        return clockInTime.getHours() > constants.LATE_CLOCK_IN.HOUR ||
-            (clockInTime.getHours() === constants.LATE_CLOCK_IN.HOUR &&
-                clockInTime.getMinutes() >= constants.LATE_CLOCK_IN.MINUTE);
+        return hour > constants.LATE_CLOCK_IN.HOUR ||
+            (hour === constants.LATE_CLOCK_IN.HOUR &&
+                minute >= constants.LATE_CLOCK_IN.MINUTE);
     }
 }
 

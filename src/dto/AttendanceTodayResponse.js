@@ -17,13 +17,15 @@ class AttendanceTodayResponse {
 
         this.attendance = {
             userNo: attendance.userNo,
-            clockin: attendance.startHour ? dateHelper.datetime(
-                dateHelper.parseDateTime(
-                    attendance.date_, `${attendance.startHour}:${attendance.startMin}`)
+            clockin: attendance.startHour ? dateHelper.formatDbDateTime(
+                attendance.date_,
+                attendance.startHour,
+                attendance.startMin
             ) : null,
-            clockout: attendance.endHour ?dateHelper.datetime(
-                dateHelper.parseDateTime(
-                    attendance.date_, `${attendance.endHour}:${attendance.endMin}`)
+            clockout: attendance.endHour ? dateHelper.formatDbDateTime(
+                attendance.date_,
+                attendance.endHour,
+                attendance.endMin
             ) : null,
         };
 

@@ -70,43 +70,15 @@ class DateHelper {
 
     }
 
-    parseDateTime(dateStr, timeStr) {
-        const year = Number(dateStr.slice(0, 4));
-        const month = Number(dateStr.slice(4, 6)) - 1;
-        const day = Number(dateStr.slice(6, 8));
-        const [hour, minute] = timeStr.split(":").map(Number);
+    formatDbDateTime(dateStr, hour, minute) {
+        if (!dateStr || hour == null || minute == null) {
+            return null;
+        }
 
-        // Create an approximate UTC date using the same date/time values.
-        const utcDate = new Date(
-            Date.UTC(year, month, day, hour, minute, 0)
-        );
+        const date = String(dateStr);
 
-        // Get the timezone representation of that UTC date.
-        const formatter = new Intl.DateTimeFormat("en-US", {
-            timeZone: config.timezone,
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: false
-        });
-
-        const parts = formatter.formatToParts(utcDate);
-
-        const get = (type) =>
-            Number(parts.find(p => p.type === type)?.value || 0);
-
-        const localHour = get("hour");
-
-        // Difference between the requested local time and the
-        // timezone's representation.
-        const offsetHours = localHour - hour;
-
-        return new Date(
-            Date.UTC(year, month, day, hour - offsetHours, minute, 0)
-        );
+        return `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)} ` +
+            `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
     }
 }
 
