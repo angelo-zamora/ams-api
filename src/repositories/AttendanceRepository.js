@@ -1,5 +1,6 @@
 const db = require("../database/DatabaseFactory");
 const TimeManage = require("../models/TimeManage");
+const config = require("../config/AppConfig");
 
 /**
  * ============================================
@@ -22,7 +23,7 @@ class AttendanceRepository {
             FROM TIMEMANAGE
             WHERE USERNO = :1
               AND DATE_ = TO_CHAR(
-                    SYSTIMESTAMP AT TIME ZONE 'Asia/Manila',
+                    SYSTIMESTAMP AT TIME ZONE '${config.timezone}',
                     'YYYYMMDD'
                 )
             AND ROWNUM = 1
@@ -47,7 +48,7 @@ class AttendanceRepository {
             FROM TIMEMANAGE t
             INNER JOIN USERINFO u ON t.USERNO = u.USERNO
             WHERE t.DATE_ = TO_CHAR(
-                    SYSTIMESTAMP AT TIME ZONE 'Asia/Manila',
+                    SYSTIMESTAMP AT TIME ZONE '${config.timezone}',
                     'YYYYMMDD'
                 )
               AND t.STARTHOUR IS NOT NULL
@@ -84,7 +85,7 @@ class AttendanceRepository {
                 FROM TIMEMANAGE t
                 WHERE t.USERNO = u.USERNO
                 AND t.DATE_ = TO_CHAR(
-                    SYSTIMESTAMP AT TIME ZONE 'Asia/Manila',
+                    SYSTIMESTAMP AT TIME ZONE '${config.timezone}',
                     'YYYYMMDD'
                 )
                 AND t.STARTHOUR IS NOT NULL
@@ -109,7 +110,7 @@ class AttendanceRepository {
             FROM TIMEMANAGE t
             INNER JOIN USERINFO u ON t.USERNO = u.USERNO
             WHERE t.DATE_ = TO_CHAR(
-                    SYSTIMESTAMP AT TIME ZONE 'Asia/Manila',
+                    SYSTIMESTAMP AT TIME ZONE '${config.timezone}',
                     'YYYYMMDD'
                 )
               AND t.STARTHOUR IS NOT NULL
@@ -140,7 +141,7 @@ class AttendanceRepository {
                 FROM TIMEMANAGE t
                 WHERE t.USERNO = u.USERNO
                 AND t.DATE_ = TO_CHAR(
-                    SYSTIMESTAMP AT TIME ZONE 'Asia/Manila',
+                    SYSTIMESTAMP AT TIME ZONE '${config.timezone}',
                     'YYYYMMDD'
                 )
                 AND t.STARTHOUR IS NOT NULL

@@ -17,9 +17,9 @@ class EmployeeRepository {
 
         const sql = `
             SELECT
-            *
+                *
             FROM USERINFO
-            WHERE MAILADDRESS = :1
+            WHERE LOWER(TRIM(REGEXP_SUBSTR(MAILADDRESS, '[^,]+', 1, 1))) = LOWER(TRIM(:1))
             AND ROWNUM = 1
         `;
 

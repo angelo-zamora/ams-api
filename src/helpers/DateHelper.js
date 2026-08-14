@@ -75,29 +75,38 @@ class DateHelper {
         const month = Number(dateStr.slice(4, 6)) - 1;
         const day = Number(dateStr.slice(6, 8));
         const [hour, minute] = timeStr.split(":").map(Number);
-        
-        // Determine the timezone offset by checking what a test UTC time looks like in our timezone
-        const testUtcDate = new Date(Date.UTC(year, month, day, 12, 0, 0));
-        
-        const formatter = new Intl.DateTimeFormat('en-US', {
+
+        // Create an approximate UTC date using the same date/time values.
+        const utcDate = new Date(
+            Date.UTC(year, month, day, hour, minute, 0)
+        );
+
+        // Get the timezone representation of that UTC date.
+        const formatter = new Intl.DateTimeFormat("en-US", {
             timeZone: config.timezone,
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false
         });
-        
-        const parts = formatter.formatToParts(testUtcDate);
-        const getTestHour = () => Number(parts.find(p => p.type === 'hour')?.value || 0);
-        
-        // Calculate the timezone offset in hours
-        const offsetHours = getTestHour() - 12;
-        
-        // Convert input time to UTC by subtracting the offset
-        const utcHour = hour - offsetHours;
-        
-        return new Date(Date.UTC(year, month, day, utcHour, minute, 0));
+
+        const parts = formatter.formatToParts(utcDate);
+
+        const get = (type) =>
+            Number(parts.find(p => p.type === type)?.value || 0);
+
+        const localHour = get("hour");
+
+        // Difference between the requested local time and the
+        // timezone's representation.
+        const offsetHours = localHour - hour;
+
+        return new Date(
+            Date.UTC(year, month, day, hour - offsetHours, minute, 0)
+        );
     }
 }
 

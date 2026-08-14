@@ -1,5 +1,6 @@
 const db = require("../database/DatabaseFactory");
 const Zangyou = require("../models/Zangyou");
+const config = require("../config/AppConfig");
 
 /**
  * ============================================
@@ -59,7 +60,7 @@ class OvertimeRepository {
                 ON o.USERNO = t.USERNO
             AND o.REQDATE = t.DATE_
             WHERE t.DATE_ = TO_CHAR(
-                    SYSTIMESTAMP AT TIME ZONE 'Asia/Manila',
+                    SYSTIMESTAMP AT TIME ZONE '${config.timezone}',
                     'YYYYMMDD'
                 )
             AND t.STARTHOUR IS NOT NULL

@@ -51,7 +51,7 @@ class NotificationService {
         const message = constants.NOTIFICATIONS.CLOCK_OUT_REMINDER;
 
         await this.processConcurrently(users, 10, async (user) => {
-            const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
+            const email = (user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS).split(',')[0].trim();
 
             try {
                 if (email) {
@@ -82,7 +82,7 @@ class NotificationService {
 
             const diffMinutes = Math.floor((dateHelper.now() - otStart) / 60000);
             if (diffMinutes >= 180 && diffMinutes < 185) {
-                const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
+                const email = (user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS).split(',')[0].trim();;
 
                 try {
                     if (email) {
@@ -113,7 +113,7 @@ class NotificationService {
         const message = constants.NOTIFICATIONS.NO_CLOCK_IN_REMINDER;
 
         await this.processConcurrently(users, 10, async (user) => {
-            const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
+            const email = (user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS).split(',')[0].trim();
 
             try {
                 if (email) {
@@ -135,7 +135,7 @@ class NotificationService {
         console.log(`Sending clock out reminder to ${users.length} employees.`);
 
         await this.processConcurrently(users, 10, async (user) => {
-            const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
+            const email = (user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS).split(',')[0].trim();
 
             try {
                 if (email) {
@@ -163,7 +163,7 @@ class NotificationService {
         console.log(`Sending new card reminder to ${users.length} employees.`);
 
         await this.processConcurrently(users, 10, async (user) => {
-            const email = user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS;
+            const email = (user.MAIL || user.mail || user.mailaddress || user.MAILADDRESS).split(',')[0].trim();
 
             try {
                 if (email) {
