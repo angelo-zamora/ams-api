@@ -1,319 +1,174 @@
-# AMS API — Azure Functions Backend
+# AMS API - Azure Functions Backend
 
-A Node.js Azure Functions v4 backend that provides REST APIs for the Attendance Management System (AMS). All endpoints are secured with Microsoft Entra ID (Azure AD) token validation.
-
----
-
-## Table of Contents
-
-- [Prerequisites](#prerequisites)
-- [Project Structure](#project-structure)
-- [Local Setup](#local-setup)
-- [Environment Configuration](#environment-configuration)
-- [Running Locally](#running-locally)
-- [API Endpoints](#api-endpoints)
-- [Testing with Postman](#testing-with-postman)
-- [Deployment to Azure](#deployment-to-azure)
-
----
+Node.js Azure Functions v4 backend for the Attendance Management System (AMS). HTTP endpoints validate Microsoft Entra ID access tokens before processing requests.
 
 ## Prerequisites
 
-| Tool | Version | Download |
-|------|---------|----------|
-| Node.js | 18.x or later | https://nodejs.org |
-| Azure Functions Core Tools | v4.x | https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local |
-| Azure CLI | Latest | https://learn.microsoft.com/en-us/cli/azure/install-azure-cli |
-| Git | Latest | https://git-scm.com |
+| Tool | Version |
+|------|---------|
+| Node.js | 22.14.0 or later |
+| Azure Functions Core Tools | v4.x |
+| Azure CLI | Latest |
+| Visual Studio Code | Latest (required for Microsoft 365 Agents Toolkit deployment) |
 
-Install Azure Functions Core Tools:
+Install Azure Functions Core Tools if needed:
+
 ```bash
 npm install -g azure-functions-core-tools@4 --unsafe-perm true
 ```
-
----
 
 ## Project Structure
 
 ```
 Functions/
 ├── src/
-│   ├── functions/
-│   │   ├── AttendanceCheckIn.js     # POST/GET attendance records
-│   │   ├── GetAttendanceHistory.js  # GET attendance history with filters
-│   │   └── GetEmployees.js          # GET employee list with filters
-│   ├── utils/
-│   │   └── auth.js                  # Microsoft Entra ID token validation
-│   └── index.js                     # Function app entry point
-├── employees.json                   # Mock employee data (local DB)
-├── attendance.json                  # Auto-generated attendance records (local DB)
-├── host.json                        # Azure Functions host configuration
-├── local.settings.json              # Local environment variables (NOT committed)
-└── package.json
+│   ├── config/                 # Application, database, Graph, mail, and API configuration
+│   ├── controllers/            # Attendance and overtime request handling
+│   ├── database/               # Database connection and factory
+│   ├── dto/                    # Response data-transfer objects
+│   ├── functions/              # Azure Function registrations
+│   │   ├── Attendance/         # GetAttendanceToday
+│   │   ├── ClockIn/            # ClockIn
+│   │   ├── ClockOut/           # clockout
+│   │   ├── Leave/              # leave and getLeaveRequestByDate
+│   │   ├── Overtime/            # overtime and getOvertime
+│   │   └── *Reminder/           # Scheduled reminder functions
+│   ├── graph/                  # Microsoft Graph integration
+│   ├── helpers/                # API, date, locale, logging, and response helpers
+│   ├── middleware/             # Authentication middleware
+│   ├── models/                # Database models
+│   ├── repositories/           # Data-access repositories
+│   ├── services/               # Business and integration services
+│   ├── utils/                  # Graph client and JWT validation
+│   ├── validators/              # Request validation
+│   └── index.js                 # Function app entry point
+├── employees.json              # Local employee data, when applicable
+├── host.json                   # Azure Functions host configuration
+├── local.settings.json.example # Environment variable template
+├── package.json
+└── test/                       # Automated tests
 ```
-
----
 
 ## Local Setup
 
-### 1. Clone the repository
+1. Install dependencies:
 
-```bash
-git clone https://github.com/angelo-zamora/ams-api.git
-cd ams-api
-```
+   ```bash
+   npm install
+   ```
 
-### 2. Install dependencies
+2. Create the local settings file from the template. `local.settings.json` is gitignored and must not be committed:
 
-```bash
-npm install
-```
+   ```powershell
+   Copy-Item local.settings.json.example local.settings.json
+   ```
 
-### 3. Configure environment variables
-
-Create a `local.settings.json` file in the root of the project (this file is gitignored):
-
-```json
-{
-  "IsEncrypted": false,
-  "Values": {
-    "AzureWebJobsStorage": "",
-    "FUNCTIONS_WORKER_RUNTIME": "node",
-    "ENTRA_TENANT_ID": "<your-azure-tenant-id>",
-    "ENTRA_CLIENT_ID": "<your-azure-app-client-id>"
-  }
-}
-```
-
-> **Where to find these values:**
-> - `ENTRA_TENANT_ID` — Azure Portal → Azure Active Directory → Overview → **Tenant ID**
-> - `ENTRA_CLIENT_ID` — Azure Portal → App Registrations → your app → **Application (client) ID**
-
----
+3. Open `local.settings.json` and fill in the required values for Azure, the database, Graph, email, attendance API, and reminders. Keep the setting names from the example file unchanged.
 
 ## Environment Configuration
 
-### Azure App Registration Setup
+`local.settings.json.example` is the source of truth for the current environment configuration. Important groups include:
 
-Before running locally, ensure your Azure App Registration is configured:
+- `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, and `AZURE_CLIENT_SECRET` for Entra ID and Microsoft Graph
+- `API_CLIENT_ID` for API token audience validation
+- `DB_*` and `DB_CONNECT_STRING` for the database
+- `ATTENDANCE_API_*` for the attendance API
+- `ATTENDANCE_MAIL`, `SYSTEM_MAIL`, and `TEAMS_SERVICE_URL` for notifications and Bot Framework integration
+- `BOT_REMINDER_*` and `ENABLE_*_REMINDER` for reminder jobs
+- `TIMEZONE` for date and schedule handling
 
-1. Go to [Azure Portal → App Registrations](https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/RegisteredApps)
-2. Select your app registration
+### Azure App Registration
 
-**Authentication tab:**
-- Add a **Single-page application** platform
-- Add Redirect URI: `https://oauth.pstmn.io/v1/callback` (for Postman testing)
+Configure the app registration used by the API and Postman:
 
-**Expose an API tab:**
-- Set Application ID URI: `api://<ENTRA_CLIENT_ID>`
-- Add a scope named `access_as_user`
-  - Who can consent: `Admins and users`
-
-**API Permissions tab:**
-- Add permission → My APIs → your app → `access_as_user`
-- Click **Grant admin consent**
-
----
+1. Register the Postman callback URI `https://oauth.pstmn.io/v1/callback` under **Authentication**.
+2. Under **Expose an API**, configure the application ID URI and the API scope required by the Postman collection.
+3. Grant the required delegated permissions and admin consent.
 
 ## Running Locally
 
-Start the Azure Functions runtime:
-
 ```bash
 npm start
-# or
-func start
 ```
 
-The functions will be available at:
-```
-http://localhost:7071/api/
-```
-
----
+The API is available at `http://localhost:7071/api/`.
 
 ## API Endpoints
 
-All endpoints require a valid Microsoft Entra ID Bearer token in the `Authorization` header:
-```
-Authorization: Bearer <access_token>
-```
+All HTTP endpoints require a bearer token. The current routes are:
 
-### `GET /api/AttendanceCheckIn`
-Returns the authenticated user's attendance records.
+| Method | Route | Purpose |
+|--------|-------|---------|
+| POST | `/api/ClockIn` | Clock in |
+| POST | `/api/clockout` | Clock out |
+| GET | `/api/GetAttendanceToday` | Get today's attendance |
+| POST | `/api/leave` | Submit a leave request |
+| GET | `/api/getLeaveRequestByDate` | Get a leave request by date |
+| POST | `/api/overtime` | Submit an overtime request |
+| GET | `/api/getOvertime` | Get overtime details |
 
-**Response:**
-```json
-{
-  "user": { "id": "...", "name": "...", "email": "..." },
-  "records": [ { "id": "...", "type": "check-in", "timestamp": "...", "location": "..." } ]
-}
-```
-
----
-
-### `POST /api/AttendanceCheckIn`
-Records a new check-in or check-out for the authenticated user.
-
-**Request Body:**
-```json
-{
-  "type": "check-in",       // Required: "check-in" or "check-out"
-  "location": "Main Office", // Optional
-  "notes": "On time"         // Optional
-}
-```
-
-**Response `201`:**
-```json
-{
-  "message": "Attendance successfully recorded.",
-  "record": { "id": "...", "type": "check-in", "timestamp": "...", ... }
-}
-```
-
----
-
-### `GET /api/GetAttendanceHistory`
-Returns attendance records with optional filters.
-
-**Query Parameters:**
-
-| Parameter | Type | Description | Example |
-|-----------|------|-------------|---------|
-| `userId` | string | Filter by a specific user's Object ID | `?userId=abc-123` |
-| `month` | string | Filter by exact month (`YYYY-MM`) | `?month=2026-06` |
-| `startMonth` | string | Start of month range (`YYYY-MM`) | `?startMonth=2026-01` |
-| `endMonth` | string | End of month range (`YYYY-MM`) | `?endMonth=2026-06` |
-
-**Response:**
-```json
-{
-  "items": [ { ... } ],
-  "total": 10
-}
-```
-
----
-
-### `GET /api/GetEmployees`
-Returns the employee list with optional filters.
-
-**Query Parameters:**
-
-| Parameter | Type | Description | Example |
-|-----------|------|-------------|---------|
-| `name` | string | Search by first or last name (partial, case-insensitive) | `?name=john` |
-| `department` | string | Filter by department (exact match, case-insensitive) | `?department=Engineering` |
-| `office` | string | Filter by office location (exact match, case-insensitive) | `?office=Manila` |
-
-**Response:**
-```json
-{
-  "items": [ { "id": "...", "firstName": "...", "lastName": "...", "department": "...", "office": "..." } ],
-  "total": 5
-}
-```
-
----
+Reminder functions run on their configured schedules and are not interactive API routes.
 
 ## Testing with Postman
 
-### Step 1: Get an Access Token
+1. Start the Functions host with `npm start`.
+2. In the Postman collection, send the **Generate Token** request first.
+3. Copy the returned access token into the `TEAMS_TOKEN` variable in the **AMS** Postman environment.
+4. Select the **AMS** environment and send any endpoint request. The requests use `TEAMS_TOKEN` as the bearer token.
 
-1. Open Postman → New Request → **Authorization** tab
-2. Set **Type** to `OAuth 2.0`
-3. Click **Get New Access Token** and fill in:
-
-| Field | Value |
-|-------|-------|
-| Grant Type | `Authorization Code (With PKCE)` |
-| Callback URL | `https://oauth.pstmn.io/v1/callback` |
-| Authorize using browser | ✅ Checked |
-| Auth URL | `https://login.microsoftonline.com/<ENTRA_TENANT_ID>/oauth2/v2.0/authorize` |
-| Access Token URL | `https://login.microsoftonline.com/<ENTRA_TENANT_ID>/oauth2/v2.0/token` |
-| Client ID | `<ENTRA_CLIENT_ID>` |
-| Scope | `api://<ENTRA_CLIENT_ID>/access_as_user` |
-| Code Challenge Method | `SHA-256` |
-
-4. Click **Get New Access Token** → sign in with your Microsoft/Teams account
-5. Click **Use Token**
-
-### Step 2: Call an Endpoint
-
-```
-GET http://localhost:7071/api/GetEmployees
-Authorization: Bearer <your_token>
-```
-
----
+If token generation fails, verify the tenant, client ID, API scope, callback URI, and admin consent in the app registration. Tokens must be generated again after they expire.
 
 ## Deployment to Azure
 
-### Step 1: Login to Azure
+Choose one of the following deployment options.
 
-```bash
-az login
-```
+### Option 1: Azure CLI and Functions Core Tools
 
-### Step 2: Create Azure Resources (first time only)
+1. Sign in:
 
-```bash
-# Create a resource group
-az group create --name ams-rg --location southeastasia
+   ```bash
+   az login
+   ```
 
-# Create a storage account (required by Azure Functions)
-az storage account create \
-  --name amsstorage \
-  --location southeastasia \
-  --resource-group ams-rg \
-  --sku Standard_LRS
+2. Create or select an Azure resource group, storage account, and Node.js 22 Function App. The Function App must use Functions runtime v4.
 
-# Create the Function App
-az functionapp create \
-  --resource-group ams-rg \
-  --consumption-plan-location southeastasia \
-  --runtime node \
-  --runtime-version 18 \
-  --functions-version 4 \
-  --name ams-api \
-  --storage-account amsstorage
-```
+3. Configure every setting required by `local.settings.json.example` in the Function App. Do not upload secrets from source control:
 
-### Step 3: Set Environment Variables in Azure
+   ```bash
+   az functionapp config appsettings set \
+     --name <function-app-name> \
+     --resource-group <resource-group> \
+     --settings AZURE_TENANT_ID="<tenant-id>" AZURE_CLIENT_ID="<client-id>"
+   ```
 
-```bash
-az functionapp config appsettings set \
-  --name ams-api \
-  --resource-group ams-rg \
-  --settings \
-    ENTRA_TENANT_ID="<your-tenant-id>" \
-    ENTRA_CLIENT_ID="<your-client-id>"
-```
+4. Publish from this directory:
 
-### Step 4: Deploy
+   ```bash
+   func azure functionapp publish <function-app-name>
+   ```
 
-```bash
-func azure functionapp publish ams-api
-```
+The deployed API is available at `https://<function-app-name>.azurewebsites.net/api/`.
 
-After deployment, your API will be live at:
-```
-https://ams-api.azurewebsites.net/api/
-```
+### Option 2: Microsoft 365 Agents Toolkit
 
-### Step 5: Update Postman Auth URLs
+Use this option when the Functions project is the backend for a Microsoft 365 or Teams agent.
 
-Replace `localhost:7071` with your live URL, and update the **Auth URL** and **Token URL** in Postman to use your specific **Tenant ID** instead of `common`.
+1. Install the **Microsoft 365 Agents Toolkit** extension in VS Code and sign in to Azure and Microsoft 365.
+2. Open the Microsoft 365 agent workspace that contains this Functions project. If this repository is standalone, add it as the agent's backend resource according to the workspace's toolkit configuration.
+3. In the **Microsoft 365 Agents Toolkit** view, select the target environment, such as `dev`.
+4. Run **Provision** to create or connect the Azure resources required by the agent and Function App.
+5. Configure the Function App environment variables using the names in `local.settings.json.example`. Store secrets in the toolkit/Azure environment configuration, not in source control.
+6. Run **Deploy** from the toolkit view. After deployment, use the generated Function App URL as the API base URL for the agent and Postman.
+7. Send **Generate Token** in Postman again if the deployed API uses a different app registration, audience, or scope, then update `AMS.TEAMS_TOKEN`.
 
----
+Toolkit commands and available resources depend on the agent project's provisioning configuration. For a standalone Functions project that is not connected to an agent workspace, use Option 1.
 
 ## Common Errors
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| `ENTRA_CLIENT_ID is not configured` | Missing `local.settings.json` | Create the file with correct values |
-| `Token validation failed` | Wrong tenant/client ID or expired token | Re-acquire token in Postman |
-| `AADSTS50011: Redirect URI mismatch` | URI not registered in Azure | Add `https://oauth.pstmn.io/v1/callback` to App Registration → Authentication |
-| `AADSTS65001: No consent` | Scope not granted | Grant admin consent in Azure Portal → API Permissions |
-| `func: command not found` | Core Tools not installed | Run `npm install -g azure-functions-core-tools@4` |
+| `AZURE_CLIENT_ID is not configured` | Missing or incomplete local/Azure settings | Copy the example file and configure the required values |
+| `Token validation failed` | Wrong audience, tenant, or expired token | Run **Generate Token** again and update `AMS.TEAMS_TOKEN` |
+| `AADSTS50011: Redirect URI mismatch` | Postman callback URI is not registered | Add `https://oauth.pstmn.io/v1/callback` to the app registration |
+| `AADSTS65001: No consent` | Required API permission was not granted | Grant admin consent in the app registration |
+| `func: command not found` | Core Tools is not installed | Install Azure Functions Core Tools v4 |

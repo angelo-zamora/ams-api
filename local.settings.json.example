@@ -1,0 +1,33 @@
+{
+    "IsEncrypted": false,
+    "Values": {
+        "AzureWebJobsStorage": "",
+        "AZURE_TENANT_ID": "",
+        "AZURE_CLIENT_ID": "",
+        "API_CLIENT_ID": "",
+        "AZURE_CLIENT_SECRET": "",
+        "TEAMS_SERVICE_URL": "",
+        "FUNCTIONS_WORKER_RUNTIME": "",
+        "DB_CLIENT": "",
+        "DB_HOST": "",
+        "DB_PORT": "",
+        "DB_NAME": "",
+        "DB_USER": "",
+        "DB_PASSWORD": "",
+        "DB_CONNECT_STRING": "",
+        "ATTENDANCE_MAIL": "",
+        "ATTENDANCE_API_BASE_URL": "",
+        "ATTENDANCE_API_TOKEN_ENDPOINT": "",
+        "ATTENDANCE_API_CLOCKIN_ENDPOINT": "",
+        "ATTENDANCE_API_BASIC_AUTH": "",
+        "BOT_REMINDER_ENDPOINT": "",
+        "BOT_REMINDER_API_KEY": "",
+        "TIMEZONE": "Asia/Manila",
+        "ENABLE_ALL_REMINDERS": "true",
+        "ENABLE_CLOCK_IN_REMINDER": "true",
+        "ENABLE_CLOCK_OUT_REMINDER": "true",
+        "ENABLE_NO_CLOCK_IN_REMINDER": "true",
+        "ENABLE_NO_CLOCK_OUT_REMINDER": "true",
+        "ENABLE_OVERTIME_REMINDER": "true"
+    }
+}
