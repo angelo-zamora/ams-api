@@ -31,8 +31,8 @@ module.exports = {
     },
 
     LATE_CLOCK_IN: {
-        HOUR: 8,
-        MINUTE: 16
+        HOUR: 10,
+        MINUTE: 46
     },
 
     NOTIFICATIONS: {
