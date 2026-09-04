@@ -4,7 +4,7 @@ const apiHelper = require("../helpers/ApiHelper");
 /**
  * ============================================
  * Attendance API Service
- * ³°Éô¶ÐÂÕAPI¥µ¡¼¥Ó¥¹
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½APIï¿½ï¿½ï¿½ï¿½ï¿½Ó¥ï¿½
  * Author: CRESS-INFO Angelo
  * Date: 2026/07/15
  * ============================================
@@ -12,7 +12,7 @@ const apiHelper = require("../helpers/ApiHelper");
 class AttendanceApiService {
     /**
      * Initialize the attendance API on startup.
-     * µ¯Æ°»þ¤Ë¶ÐÂÕAPI¤ò½é´ü²½¤·¤Þ¤¹¡£
+     * ï¿½ï¿½Æ°ï¿½ï¿½ï¿½Ë¶ï¿½ï¿½ï¿½APIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½
      * @param {Object} employee - The employee object containing USERNO and PASSWORD.
      * @returns {Promise<string>} - The valid access token.
      */
@@ -27,7 +27,7 @@ class AttendanceApiService {
 
     /**
      * Clock in an employee by calling the attendance API.
-     * ½¾¶È°÷¤Î½Ð¶Ð¤òµ­Ï¿¤¹¤ë¤Ë¤Ï¡¢¶ÐÂÕ´ÉÍýAPI¤ò¸Æ¤Ó½Ð¤·¤Þ¤¹¡£
+     * ï¿½ï¿½ï¿½È°ï¿½ï¿½Î½Ð¶Ð¤ï¿½Ï¿ï¿½ï¿½ï¿½ï¿½Ë¤Ï¡ï¿½ï¿½ï¿½ï¿½Õ´ï¿½ï¿½ï¿½APIï¿½ï¿½Æ¤Ó½Ð¤ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½
      * @param {Object} employee - The employee object containing USERNO and PASSWORD.
      * @returns {Promise<Object>} - The response from the attendance API.
      */
@@ -54,7 +54,7 @@ class AttendanceApiService {
 
     /**
      * Clock out an employee by calling the attendance API.
-     * ½¾¶È°÷¤ÎÂà¶Ð¤òµ­Ï¿¤¹¤ë¤Ë¤Ï¡¢¶ÐÂÕ´ÉÍýAPI¤ò¸Æ¤Ó½Ð¤·¤Þ¤¹¡£
+     * ï¿½ï¿½ï¿½È°ï¿½ï¿½ï¿½ï¿½ï¿½Ð¤ï¿½Ï¿ï¿½ï¿½ï¿½ï¿½Ë¤Ï¡ï¿½ï¿½ï¿½ï¿½Õ´ï¿½ï¿½ï¿½APIï¿½ï¿½Æ¤Ó½Ð¤ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½
      * @param {Object} employee - The employee object containing USERNO and PASSWORD.
      * @returns {Promise<Object>} - The response from the attendance API.
      */
@@ -81,7 +81,7 @@ class AttendanceApiService {
 
     /**
      * Request employee's leave data from the attendance API.
-     * ½¾¶È°÷¤ÎµÙ²Ë¥Ç¡¼¥¿¤ò¶ÐÂÕ´ÉÍýAPI¤«¤é¼èÆÀ¤·¤Þ¤¹¡£
+     * ï¿½ï¿½ï¿½È°ï¿½ï¿½ÎµÙ²Ë¥Ç¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ´ï¿½ï¿½ï¿½APIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½
      * @param {Object} employee - The employee object containing USERNO and PASSWORD.
      * @param {Object} payload - The payload to send to the API.
      * @returns {Promise<Object>} - The response from the attendance API.
@@ -111,7 +111,7 @@ class AttendanceApiService {
 
     /**
      * Request employee's attendance data from the attendance API.
-     * ½¾¶È°÷¤Î¶ÐÂÕ¥Ç¡¼¥¿¤ò¶ÐÂÕ´ÉÍýAPI¤«¤é¼èÆÀ¤·¤Þ¤¹¡£
+     * ï¿½ï¿½ï¿½È°ï¿½ï¿½Î¶ï¿½ï¿½Õ¥Ç¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ´ï¿½ï¿½ï¿½APIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½
      * @private
     */
     async _requestAttendanceApi(token, userNo, $endpoint) {
@@ -130,24 +130,73 @@ class AttendanceApiService {
 
     /**
      * Request employee's leave data from the attendance API.
-     * ½¾¶È°÷¤ÎµÙ²Ë¥Ç¡¼¥¿¤ò¶ÐÂÕ´ÉÍýAPI¤«¤é¼èÆÀ¤·¤Þ¤¹¡£
+     * ï¿½ï¿½ï¿½È°ï¿½ï¿½ÎµÙ²Ë¥Ç¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ´ï¿½ï¿½ï¿½APIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½
      * @private
     */
     async _requestLeaveApi(token, $endpoint, payload) {
-            const url = apiHelper.buildUrl(
-                `${$endpoint}`
-            );
-    
-            return apiHelper.requestWithRetry({
-                method: "POST",
-                url,
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(payload)
+        const url = apiHelper.buildUrl(
+            `${$endpoint}`
+        );
+
+        return apiHelper.requestWithRetry({
+            method: "POST",
+            url,
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+    }
+
+    async getMonthlyAttendance(employee, accountId, year, month) {
+        try {
+            const password = apiHelper.resolvePassword(employee);
+
+            if (!accountId || !year || !month) {
+                throw new Error("Missing accountId, year, or month for monthly attendance query.");
+            }
+
+            const token = await apiHelper.getValidToken({
+                ...employee,
+                PASSWORD: password
             });
+
+            const response = await this._requestMonthlyAttendanceApi(
+                token,
+                accountId,
+                year,
+                month
+            );
+
+            if (response.statusCode >= 400) {
+                throw new Error(response.body?.message || "Monthly attendance fetch failed");
+            }
+
+            return response.body;
+        } catch (error) {
+            logger.error(error);
+            throw error;
         }
+    }
+
+    async _requestMonthlyAttendanceApi(token, accountId, year, month) {
+        const params = new URLSearchParams({
+            accountId,
+            year,
+            month
+        });
+
+        const url = apiHelper.buildUrl(`/time/searchMonthly?${params.toString()}`);
+
+        return apiHelper.requestWithRetry({
+            method: "GET",
+            url,
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+    }
 }
 
 module.exports = new AttendanceApiService();

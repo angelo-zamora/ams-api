@@ -3,6 +3,7 @@ const ClockInResponse = require("../dto/ClockInResponse");
 const ClockOutResponse = require("../dto/ClockOutResponse");
 const LeaveResponse = require("../dto/LeaveResponse");
 const AttendanceTodayResponse = require("../dto/AttendanceTodayResponse");
+const MonthlyAttendanceResponse = require("../dto/MonthlyAttendanceResponse");
 const constants = require("../helpers/Constants");
 
 /**
@@ -72,6 +73,16 @@ class AttendanceController {
         const leave = await attendanceService.getLeaveRequestByDate(session, date, locale);
 
         return new LeaveResponse(leave, locale);
+    }
+
+    async getMonthlyAttendance(session, params, locale) {
+        const monthlyAttendance = await attendanceService.getMonthlyAttendance(
+            session,
+            params,
+            locale
+        );
+
+        return new MonthlyAttendanceResponse(monthlyAttendance, locale);
     }
 }
 
