@@ -1,5 +1,6 @@
 const { app } = require("@azure/functions");
 const auth = require("../../middleware/AuthenticationMiddleware");
+const cors = require("../../middleware/CorsMiddleware");
 const overtime = require("../../controllers/OvertimeController");
 const response = require("../../helpers/ResponseHelper");
 
