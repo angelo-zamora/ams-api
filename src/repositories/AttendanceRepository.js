@@ -5,7 +5,7 @@ const config = require("../config/AppConfig");
 /**
  * ============================================
  * Attendance Repository
- * ½Ð¶Ð´ÉÍý¥ê¥Ý¥¸¥È¥ê
+ * ï¿½Ð¶Ð´ï¿½ï¿½ï¿½ï¿½ï¿½Ý¥ï¿½ï¿½È¥ï¿½
  * Author: CRESS-INFO Angelo
  * Date: 2026/07/14
  * ============================================
@@ -70,7 +70,7 @@ class AttendanceRepository {
 
     /**
      * Get users who have not clocked in today
-     * Ì¤½Ð¶Ð¼Ô¤ò¼èÆÀ¤¹¤ë¡£
+     * Ì¤ï¿½Ð¶Ð¼Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¡£
      */
     async getNoClockInUsers()
     {
@@ -100,7 +100,7 @@ class AttendanceRepository {
 
     /**
      * Get users who have not clocked out today
-     * Ì¤Âà¶Ð¼Ô¤ò¼èÆÀ¤¹¤ë¡£
+     * Ì¤ï¿½ï¿½Ð¼Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¡£
      */
     async getStillNoClockOutUsers()
     {
@@ -126,7 +126,7 @@ class AttendanceRepository {
 
     /**
      * Get users who have not clocked in today
-     * Ì¤½Ð¶Ð¼Ô¤ò¼èÆÀ¤¹¤ë¡£
+     * Ì¤ï¿½Ð¶Ð¼Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¡£
      */
     async getNoClockInUsersToday()
     {
@@ -156,7 +156,7 @@ class AttendanceRepository {
 
     /**
      * Get employee leave request
-     * ½¾¶È°÷¤ÎµÙ²Ë¿½ÀÁ¤ò¼èÆÀ¤¹¤ë¡£
+     * ï¿½ï¿½ï¿½È°ï¿½ï¿½ÎµÙ²Ë¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¡£
      * @param {string} userNo - The employee's user number.
      * @param {string} date - The date of the leave request in 'YYYYMMDD' format.
      * @returns {Promise<TimeManage|null>} - The leave request if found, otherwise null.
@@ -177,6 +177,39 @@ class AttendanceRepository {
         const rows = Array.isArray(result) ? result[0] : result.rows || [];
 
         return rows.length ? TimeManage.fromDbRow(rows[0]) : null;
+    }
+
+    /**
+     * Get attendance edit history
+     * @param {string} userNo - The employee's user number.
+     * @param {string} year - The year in 'YYYY' format.
+     * @param {string} month - The month in 'MM' format.
+     * @returns {Promise<Array>} - The edit history records
+     */
+    async getEditHistory(userNo, year, month) {
+        const sql = `
+            SELECT
+                h.*,
+                u.USERNAME AS "UDTUSERNAME"
+            FROM HISTORY h
+            LEFT JOIN USERINFO u
+                ON INSTR(
+                    ',' || REPLACE(u.MailAddress, ' ', '') || ',',
+                    ',' || REPLACE(h.UDTUser, ' ', '') || ','
+                ) > 0
+            WHERE h.REASON IS NOT NULL
+            AND h.USERNO = :1
+            AND SUBSTR(h.DATE_, 1, 4) = :2
+            AND SUBSTR(h.DATE_, 5, 2) = :3
+            ORDER BY h.DATE_ DESC, h.UDTDATE DESC
+        `;
+
+        const result = await db.getConnection().execute(sql, [
+            userNo, year, month
+        ]);
+        const rows = Array.isArray(result) ? result[0] : result.rows || [];
+
+        return rows;
     }
 }
 

@@ -4,6 +4,7 @@ const ClockOutResponse = require("../dto/ClockOutResponse");
 const LeaveResponse = require("../dto/LeaveResponse");
 const AttendanceTodayResponse = require("../dto/AttendanceTodayResponse");
 const MonthlyAttendanceResponse = require("../dto/MonthlyAttendanceResponse");
+const EditHistoryResponse = require("../dto/EditHistoryResponse");
 const constants = require("../helpers/Constants");
 
 /**
@@ -83,6 +84,11 @@ class AttendanceController {
         );
 
         return new MonthlyAttendanceResponse(monthlyAttendance, locale);
+    }
+    async getEditHistory(session, params, locale) {
+        const editHistory = await attendanceService.getEditHistory(session, params, locale);
+
+        return new EditHistoryResponse(editHistory);
     }
 }
 

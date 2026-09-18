@@ -160,6 +160,61 @@ class AttendanceService {
             (hour === constants.LATE_CLOCK_IN.HOUR &&
                 minute >= constants.LATE_CLOCK_IN.MINUTE);
     }
+
+    /**
+     * Get attendance edit history
+     * @param {Object} session - The session object containing user information
+     * @param {Object} params - Parameters containing userNo and date
+     * @param {string} locale - The locale for response messages
+     * @returns {Promise<Array>} - Array of edit history records with date field
+     */
+    async getEditHistory(session, params, locale) {
+        const email = session.currentUser.email;
+        const employee = await employeeService.validateEmployee(email, locale);
+
+        const { userNo, date } = params;
+
+        // Extract year and month from date (YYYYMMDD format)
+        const year = date.substring(0, 4);
+        const month = date.substring(4, 6);
+
+        const rows = await attendanceRepository.getEditHistory(userNo, year, month);
+
+        if (!rows || rows.length === 0) {
+            return null;
+        }
+
+        // Process all records
+        return rows.map(row => {
+            // Format clockin and clockout times
+            const clockin = row.STARTHOUR && row.STARTMIN 
+                ? `${String(row.STARTHOUR).padStart(2, '0')}:${String(row.STARTMIN).padStart(2, '0')}`
+                : null;
+
+            const clockout = row.ENDHOUR && row.ENDMIN 
+                ? `${String(row.ENDHOUR).padStart(2, '0')}:${String(row.ENDMIN).padStart(2, '0')}`
+                : null;
+
+            // Parse UDTDATE (YYYYMMDDHHMMSS format) to get HH:MM
+            let updateTime = null;
+            if (row.UDTDATE && row.UDTDATE.length >= 14) {
+                const hour = row.UDTDATE.substring(8, 10);
+                const minute = row.UDTDATE.substring(10, 12);
+                updateTime = `${hour}:${minute}`;
+            }
+
+            return {
+                date: row.DATE_,
+                userno: row.USERNO,
+                clockin,
+                clockout,
+                reason: row.REASON,
+                updatedBy: row.UDTUSERNAME,
+                status: row.STATUS,
+                updateTime
+            };
+        });
+    }
 }
 
 module.exports = new AttendanceService();

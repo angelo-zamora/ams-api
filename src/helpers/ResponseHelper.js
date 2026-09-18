@@ -57,6 +57,21 @@ class ResponseHelper {
 
     }
 
+    badRequestWithCors(message, locale, data = {}, request) {
+        const resolvedLocale = localeHelper.resolveLocale(locale);
+
+        return {
+            status: 400,
+            headers: this.getCorsHeaders(request),
+            jsonBody: {
+                success: false,
+                message: localeHelper.translate(message, resolvedLocale),
+                data
+            }
+        };
+
+    }
+
     notFound(message, locale) {
         const resolvedLocale = localeHelper.resolveLocale(locale);
 

@@ -64,8 +64,49 @@ app.http("GetMonthlyAttendance", {
             if (error?.message === "NO_MONTHLY_ATTENDANCE_FOUND") {
                 return response.notFoundWithCors("NO_MONTHLY_ATTENDANCE_FOUND", request.headers.get("x-locale") || "en", request);
             }
-
             return response.serverErrorWithCors(error, request.headers.get("x-locale") || "en", request);
         }
     }
+});
+
+app.http("GetAttendanceEditHistory", {
+
+    methods: ["GET", "OPTIONS"],
+
+    authLevel: "anonymous",
+
+    handler: async (request, context) => {
+
+        const preflightResponse = cors.handlePreflight(request);
+        if (preflightResponse) return preflightResponse;
+
+        try {
+            const locale = request.headers.get("x-locale") || request.headers.get("x-language") || "en";
+            const session = await auth.authenticate(request);
+
+            const userNo = request.query.get("userNo");
+            const date = request.query.get("date");
+
+            if (!userNo || !date) {
+                return response.badRequestWithCors("INVALID_PARAMETERS", locale, {
+                    message: "userNo and date parameters are required"
+                }, request);
+            }
+
+            const result = await attendance.getEditHistory(session, { userNo, date }, locale);
+
+            if (!result || result.length === 0) {
+                return response.notFoundWithCors("NO_EDIT_HISTORY", locale, request);
+            }
+
+            return response.successWithCors(result, locale, request);
+
+        } catch (error) {
+            context.error(error);
+
+            return response.serverErrorWithCors(error, request.headers.get("x-locale") || "en", request);
+        }
+
+    }
+
 });

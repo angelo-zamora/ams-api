@@ -60,6 +60,7 @@ module.exports = {
     NO_CLOCK_IN_REMINDER: "0 59 23 * * 0-4",
 
     LEAVE_STATUSES: {
+        CANCELLED: "0",                // 取消
         PAID_LEAVE: "1",              // 有
         AM_LEAVE: "2",                // 前半
         PM_LEAVE: "3",                // 後半
