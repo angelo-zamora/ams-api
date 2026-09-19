@@ -27,3 +27,22 @@ app.http("GetUserInfo", {
     }
 
 });
+
+app.http("GetUserMembers", {
+    methods: ["GET", "OPTIONS"],
+    authLevel: "anonymous",
+    handler: async (request, context) => {
+        const preflightResponse = cors.handlePreflight(request);
+        if (preflightResponse) return preflightResponse;
+
+        try {
+            const locale = request.headers.get("x-locale") || request.headers.get("x-language") || "en";
+            const session = await auth.authenticate(request);
+            const result = await userInfo.getUserMembers(session, locale);
+            return response.successWithCors(result, locale, request);
+        } catch (error) {
+            context.error(error);
+            return response.serverErrorWithCors(error, request.headers.get("x-locale") || "en", request);
+        }
+    }
+});

@@ -15,6 +15,13 @@ class UserService {
         return userInfo;
     }
 
+    async getUserMembers(session, locale) {
+        const email = session.currentUser.email;
+        const employee = await employeeService.validateEmployee(email, locale);
+        const members = await userRepository.getUserMembers(employee.USERNO);
+        return members;
+    }
+
     
 }
 
