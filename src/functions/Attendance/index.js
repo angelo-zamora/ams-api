@@ -110,3 +110,39 @@ app.http("GetAttendanceEditHistory", {
     }
 
 });
+
+app.http("GetFlex", {
+    methods: ["GET", "OPTIONS"],
+    authLevel: "anonymous",
+    handler: async (request, context) => {
+
+        const preflightResponse = cors.handlePreflight(request);
+        if (preflightResponse) return preflightResponse;
+
+        try {
+            const locale = request.headers.get("x-locale") || request.headers.get("x-language") || "en";
+            const session = await auth.authenticate(request);
+
+            const userNo = request.query.get("userNo");
+            const email = request.query.get("email");
+            const workMonth = request.query.get("workMonth");
+            const workYear = request.query.get("workYear");
+
+            const result = await attendance.getFlex(
+                session,
+                { userNo, email, workMonth, workYear },
+                locale
+            );
+
+            return response.successWithCors(result, locale, request);
+
+        } catch (error) {
+            context.error(error);
+
+            if (error?.message === "NO_FLEX_FOUND") {
+                return response.notFoundWithCors("NO_FLEX_FOUND", request.headers.get("x-locale") || "en", request);
+            }
+            return response.serverErrorWithCors(error, request.headers.get("x-locale") || "en", request);
+        }
+    }
+});

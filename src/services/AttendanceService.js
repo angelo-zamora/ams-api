@@ -215,6 +215,27 @@ class AttendanceService {
             };
         });
     }
+    async getFlex(session, params, locale) {
+        const sessionEmail = session.currentUser.email;
+        const employee = await employeeService.validateEmployee(sessionEmail, locale);
+
+        const targetUserNo = params?.userNo ? params.userNo : employee.USERNO;
+        const targetEmail = params?.email ? params.email : sessionEmail;
+
+        const flexData = await attendanceApiService.getFlex(
+            employee,
+            targetUserNo,
+            targetEmail,
+            params.workMonth,
+            params.workYear
+        );
+
+        if (!flexData) {
+            throw new Error("NO_FLEX_FOUND");
+        }
+
+        return flexData;
+    }
 }
 
 module.exports = new AttendanceService();

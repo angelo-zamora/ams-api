@@ -90,6 +90,24 @@ class AttendanceController {
 
         return new EditHistoryResponse(editHistory);
     }
+
+    /**
+     * Get flex attendance information.
+     * フレックス勤怠情報を取得する。
+     * @param {Object} session - The session object containing user information.
+     * @param {Object} params - Query parameters (userNo, email, workMonth, workYear).
+     * @param {string} locale - The locale for response messages.
+     * @returns {Promise<Object>} - The flex attendance response data.
+     */
+    async getFlex(session, params, locale) {
+        const flexData = await attendanceService.getFlex(
+            session,
+            params,
+            locale
+        );
+
+        return flexData;
+    }
 }
 
 module.exports = new AttendanceController();

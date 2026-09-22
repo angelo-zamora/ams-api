@@ -197,6 +197,59 @@ class AttendanceApiService {
             }
         });
     }
+
+    async getFlex(employee, userNo, email, workMonth, workYear) {
+        try {
+            const password = apiHelper.resolvePassword(employee);
+
+            if (!workMonth || !workYear) {
+                throw new Error("Missing workMonth or workYear for flex attendance query.");
+            }
+
+            const token = await apiHelper.getValidToken({
+                ...employee,
+                PASSWORD: password
+            });
+
+            const response = await this._requestFlexApi(
+                token,
+                userNo,
+                email,
+                workMonth,
+                workYear
+            );
+
+            if (response.statusCode >= 400) {
+                throw new Error(response.body?.message || "Flex attendance fetch failed");
+            }
+
+            return response.body;
+        } catch (error) {
+            logger.error(error);
+            throw error;
+        }
+    }
+
+    async _requestFlexApi(token, userNo, email, workMonth, workYear) {
+        // Build the request body object matching your backend's KintaiReq structure
+        const payload = {};
+        if (userNo) payload.userNo = userNo;
+        if (email) payload.email = email;
+        if (workMonth) payload.workMonth = workMonth;
+        if (workYear) payload.workYear = workYear;
+
+        const url = apiHelper.buildUrl(`/kintai/getFlex`);
+
+        return apiHelper.requestWithRetry({
+            method: "POST",
+            url,
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+    }
 }
 
 module.exports = new AttendanceApiService();
