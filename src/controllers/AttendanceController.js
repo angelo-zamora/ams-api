@@ -126,6 +126,24 @@ class AttendanceController {
 
         return result;
     }
+    
+    /**
+     * Edit or send leave request with optional userNo.
+     * 休暇申請・編集を行う。
+     * @param {Object} session - The session object containing user information.
+     * @param {Object} payload - The payload containing leave edit parameters.
+     * @param {string} locale - The locale for response messages.
+     * @returns {Promise<Object>} - The response data from the leave action.
+     */
+    async editLeave(session, payload, locale) {
+        const result = await attendanceService.editLeave(
+            session,
+            payload,
+            locale
+        );
+
+        return result;
+    }
 }
 
 module.exports = new AttendanceController();
