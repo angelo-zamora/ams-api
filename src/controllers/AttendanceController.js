@@ -108,6 +108,24 @@ class AttendanceController {
 
         return flexData;
     }
+
+    /**
+     * Send or edit attendance time.
+     * 勤怠時間の編集・送信を行う。
+     * @param {Object} session - The session object containing user information.
+     * @param {Object} payload - The payload containing edit time parameters.
+     * @param {string} locale - The locale for response messages.
+     * @returns {Promise<Object>} - The response data from the edit time action.
+     */
+    async sendTime(session, payload, locale) {
+        const result = await attendanceService.sendTime(
+            session,
+            payload,
+            locale
+        );
+
+        return result;
+    }
 }
 
 module.exports = new AttendanceController();

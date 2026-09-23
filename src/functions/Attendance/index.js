@@ -146,3 +146,36 @@ app.http("GetFlex", {
         }
     }
 });
+
+app.http("PostEditTime", {
+    methods: ["POST", "OPTIONS"],
+    authLevel: "anonymous",
+    handler: async (request, context) => {
+
+        const preflightResponse = cors.handlePreflight(request);
+        if (preflightResponse) return preflightResponse;
+
+        try {
+            const locale = request.headers.get("x-locale") || request.headers.get("x-language") || "en";
+            const session = await auth.authenticate(request);
+
+            const payload = await request.json();
+
+            const result = await attendance.sendTime(
+                session,
+                payload,
+                locale
+            );
+
+            return response.successWithCors(result, locale, request);
+
+        } catch (error) {
+            context.error(error);
+
+            if (error?.message === "EDIT_TIME_FAILED") {
+                return response.notFoundWithCors("EDIT_TIME_FAILED", request.headers.get("x-locale") || "en", request);
+            }
+            return response.serverErrorWithCors(error, request.headers.get("x-locale") || "en", request);
+        }
+    }
+});

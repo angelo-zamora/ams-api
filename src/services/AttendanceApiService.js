@@ -250,6 +250,51 @@ class AttendanceApiService {
             body: JSON.stringify(payload)
         });
     }
+
+    async sendTime(employee, userNo, payloadData) {
+        try {
+            const password = apiHelper.resolvePassword(employee);
+
+            const token = await apiHelper.getValidToken({
+                ...employee,
+                PASSWORD: password
+            });
+
+            const response = await this._requestSendTimeApi(
+                token,
+                userNo,
+                payloadData
+            );
+
+            if (response.statusCode >= 400) {
+                throw new Error(response.body?.message || "Edit attendance time failed");
+            }
+
+            return response.body;
+        } catch (error) {
+            logger.error(error);
+            throw error;
+        }
+    }
+
+    async _requestSendTimeApi(token, userNo, payloadData) {
+        const payload = { ...payloadData };
+        if (userNo) {
+            payload.userNo = userNo;
+        }
+
+        const url = apiHelper.buildUrl(`/kintai/sendTime`);
+
+        return apiHelper.requestWithRetry({
+            method: "POST",
+            url,
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+    }
 }
 
 module.exports = new AttendanceApiService();

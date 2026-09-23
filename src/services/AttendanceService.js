@@ -236,6 +236,26 @@ class AttendanceService {
 
         return flexData;
     }
+
+    async sendTime(session, payload, locale) {
+        const sessionEmail = session.currentUser.email;
+        const employee = await employeeService.validateEmployee(sessionEmail, locale);
+
+        // If userNo is not provided in payload, default to logged-in user's USERNO
+        const targetUserNo = payload?.userNo ? payload.userNo : employee.USERNO;
+
+        const editData = await attendanceApiService.sendTime(
+            employee,
+            targetUserNo,
+            payload
+        );
+
+        if (!editData) {
+            throw new Error("EDIT_TIME_FAILED");
+        }
+
+        return editData;
+    }
 }
 
 module.exports = new AttendanceService();
