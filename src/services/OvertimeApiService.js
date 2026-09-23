@@ -4,7 +4,7 @@ const apiHelper = require("../helpers/ApiHelper");
 /**
  * ============================================
  * Overtime API Service
- * ³°Éô¶ÐÂÕAPI¥µ¡¼¥Ó¥¹
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½APIï¿½ï¿½ï¿½ï¿½ï¿½Ó¥ï¿½
  * Author: CRESS-INFO Angelo
  * Date: 2026/07/21
  * ============================================
@@ -12,7 +12,7 @@ const apiHelper = require("../helpers/ApiHelper");
 class OvertimeApiService {
     /**
      * Initialize the overtime API on startup.
-     * µ¯Æ°»þ¤Ë¶ÐÂÕAPI¤ò½é´ü²½¤·¤Þ¤¹¡£
+     * ï¿½ï¿½Æ°ï¿½ï¿½ï¿½Ë¶ï¿½ï¿½ï¿½APIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½
      * @param {Object} employee - The employee object containing USERNO and PASSWORD.
      * @returns {Promise<string>} - The valid access token.
      */
@@ -27,7 +27,7 @@ class OvertimeApiService {
 
     /**
      * Over time an employee by calling the overtime API.
-     * ½¾¶È°÷¤Î»Ä¶È¤òµ­Ï¿¤¹¤ë¤Ë¤Ï¡¢¶ÐÂÕ´ÉÍýAPI¤ò¸Æ¤Ó½Ð¤·¤Þ¤¹¡£
+     * ï¿½ï¿½ï¿½È°ï¿½ï¿½Î»Ä¶È¤ï¿½Ï¿ï¿½ï¿½ï¿½ï¿½Ë¤Ï¡ï¿½ï¿½ï¿½ï¿½Õ´ï¿½ï¿½ï¿½APIï¿½ï¿½Æ¤Ó½Ð¤ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½
      * @param {Object} employee - The employee object containing USERNO and PASSWORD.
      * @param {Object} payload - The payload to send to the API.
      * @returns {Promise<Object>} - The response from the attendance API.
@@ -57,13 +57,61 @@ class OvertimeApiService {
 
     /**
      * Request employee's overtime data from the overtime API.
-     * ½¾¶È°÷¤Î»Ä¶È¥Ç¡¼¥¿¤ò»Ä¶È´ÉÍýAPI¤«¤é¼èÆÀ¤·¤Þ¤¹¡£
+     * ï¿½ï¿½ï¿½È°ï¿½ï¿½Î»Ä¶È¥Ç¡ï¿½ï¿½ï¿½ï¿½ï¿½Ä¶È´ï¿½ï¿½ï¿½APIï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½
      * @private
     */
     async _requestOvertimeApi(token, $endpoint, payload) {
         const url = apiHelper.buildUrl(
             `${$endpoint}`
         );
+
+        return apiHelper.requestWithRetry({
+            method: "POST",
+            url,
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+    }
+
+    /**
+     * Send or edit overtime request to /kintai/zanRequest
+     */
+    async editOt(employee, userNo, payloadData) {
+        try {
+            const password = apiHelper.resolvePassword(employee);
+
+            const token = await apiHelper.getValidToken({
+                ...employee,
+                PASSWORD: password
+            });
+
+            const response = await this._requestZanRequestApi(
+                token,
+                userNo,
+                payloadData
+            );
+
+            if (response.statusCode >= 400) {
+                throw new Error(response.body?.message || "Edit overtime request failed");
+            }
+
+            return response.body;
+        } catch (error) {
+            logger.error(error);
+            throw error;
+        }
+    }
+
+    async _requestZanRequestApi(token, userNo, payloadData) {
+        const payload = { ...payloadData };
+        if (userNo) {
+            payload.userNo = userNo;
+        }
+
+        const url = apiHelper.buildUrl(`/kintai/zanRequest`);
 
         return apiHelper.requestWithRetry({
             method: "POST",

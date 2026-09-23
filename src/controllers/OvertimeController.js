@@ -38,6 +38,24 @@ class OvertimeController {
 
         return new OvertimeResponse(overtime, locale);
     }
+
+    /**
+     * Send or edit employee overtime request.
+     * 残業申請・編集を行う。
+     * @param {Object} session - The session object containing user information.
+     * @param {Object} payload - The payload containing overtime edit parameters.
+     * @param {string} locale - The locale for response messages.
+     * @returns {Promise<Object>} - The response data from the overtime request action.
+     */
+    async editOt(session, payload, locale) {
+        const result = await overtimeService.editOt(
+            session,
+            payload,
+            locale
+        );
+
+        return result;
+    }
 }
 
 module.exports = new OvertimeController();
