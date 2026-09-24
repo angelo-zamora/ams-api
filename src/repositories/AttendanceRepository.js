@@ -180,13 +180,12 @@ class AttendanceRepository {
     }
 
     /**
-     * Get attendance edit history
+     * Get attendance edit history by specific date
      * @param {string} userNo - The employee's user number.
-     * @param {string} year - The year in 'YYYY' format.
-     * @param {string} month - The month in 'MM' format.
+     * @param {string} date - The date in 'YYYYMMDD' format.
      * @returns {Promise<Array>} - The edit history records
      */
-    async getEditHistory(userNo, year, month) {
+    async getEditHistory(userNo, date) {
         const sql = `
             SELECT
                 h.*,
@@ -199,13 +198,12 @@ class AttendanceRepository {
                 ) > 0
             WHERE h.REASON IS NOT NULL
             AND h.USERNO = :1
-            AND SUBSTR(h.DATE_, 1, 4) = :2
-            AND SUBSTR(h.DATE_, 5, 2) = :3
+            AND h.DATE_ = :2
             ORDER BY h.DATE_ DESC, h.UDTDATE DESC
         `;
 
         const result = await db.getConnection().execute(sql, [
-            userNo, year, month
+            userNo, date
         ]);
         const rows = Array.isArray(result) ? result[0] : result.rows || [];
 

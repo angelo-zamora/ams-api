@@ -164,7 +164,7 @@ class AttendanceService {
     /**
      * Get attendance edit history
      * @param {Object} session - The session object containing user information
-     * @param {Object} params - Parameters containing userNo and date
+     * @param {Object} params - Parameters containing userNo and date (YYYYMMDD)
      * @param {string} locale - The locale for response messages
      * @returns {Promise<Array>} - Array of edit history records with date field
      */
@@ -174,11 +174,7 @@ class AttendanceService {
 
         const { userNo, date } = params;
 
-        // Extract year and month from date (YYYYMMDD format)
-        const year = date.substring(0, 4);
-        const month = date.substring(4, 6);
-
-        const rows = await attendanceRepository.getEditHistory(userNo, year, month);
+        const rows = await attendanceRepository.getEditHistory(userNo, date);
 
         if (!rows || rows.length === 0) {
             return null;
@@ -195,7 +191,7 @@ class AttendanceService {
                 ? `${String(row.ENDHOUR).padStart(2, '0')}:${String(row.ENDMIN).padStart(2, '0')}`
                 : null;
 
-            // Parse UDTDATE (YYYYMMDDHHMMSS format) to get HH:MM
+            // Parse UDTDATE (YYYYMMDDHHMMSS format) to get HH:MM for updateTime
             let updateTime = null;
             if (row.UDTDATE && row.UDTDATE.length >= 14) {
                 const hour = row.UDTDATE.substring(8, 10);
@@ -203,7 +199,14 @@ class AttendanceService {
                 updateTime = `${hour}:${minute}`;
             }
 
+            // Extract YYYYMMDD part of UDTDATE
+            let udtDate = null;
+            if (row.UDTDATE && row.UDTDATE.length >= 8) {
+                udtDate = row.UDTDATE.substring(0, 8);
+            }
+
             return {
+                id: row.NO,
                 date: row.DATE_,
                 userno: row.USERNO,
                 clockin,
@@ -211,7 +214,8 @@ class AttendanceService {
                 reason: row.REASON,
                 updatedBy: row.UDTUSERNAME,
                 status: row.STATUS,
-                updateTime
+                updateTime,
+                udtDate
             };
         });
     }
