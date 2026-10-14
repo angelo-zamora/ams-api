@@ -214,6 +214,8 @@ class AttendanceService {
                 reason: row.REASON,
                 updatedBy: row.UDTUSERNAME,
                 status: row.STATUS,
+                changeType: row.CHANGE_TYPE,
+                oldValue: row.OLD_VALUE,
                 updateTime,
                 udtDate
             };

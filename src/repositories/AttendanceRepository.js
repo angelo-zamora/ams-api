@@ -188,14 +188,56 @@ class AttendanceRepository {
     async getEditHistory(userNo, date) {
         const sql = `
             SELECT
-                h.*,
-                u.USERNAME AS "UDTUSERNAME"
+                DISTINCT h.*,
+                COALESCE((
+                    SELECT u.USERNAME
+                    FROM USERINFO u
+                    WHERE INSTR(
+                        ',' || REPLACE(u.MailAddress, ' ', '') || ',',
+                        ',' || REPLACE(h.UDTUser, ' ', '') || ','
+                    ) > 0
+                    AND ROWNUM = 1
+                ), '') AS "UDTUSERNAME",
+                CASE
+                    WHEN h.STARTHOUR IS NOT NULL THEN 'CLOCK_IN'
+                    WHEN h.ENDHOUR IS NOT NULL THEN 'CLOCK_OUT'
+                    ELSE 'LEAVE'
+                END AS "CHANGE_TYPE",
+                CASE
+                    WHEN h.STARTHOUR IS NOT NULL THEN (
+                        SELECT h2.STARTHOUR || ':' || h2.STARTMIN
+                        FROM HISTORY h2
+                        WHERE h2.USERNO = h.USERNO
+                        AND h2.DATE_ = h.DATE_
+                        AND h2.NO < h.NO
+                        AND h2.STARTHOUR IS NOT NULL
+                        ORDER BY h2.NO DESC
+                        FETCH FIRST 1 ROW ONLY
+                    )
+                    WHEN h.ENDHOUR IS NOT NULL THEN (
+                        SELECT h2.ENDHOUR || ':' || h2.ENDMIN
+                        FROM HISTORY h2
+                        WHERE h2.USERNO = h.USERNO
+                        AND h2.DATE_ = h.DATE_
+                        AND h2.NO = h.NO
+                        AND h2.ENDHOUR IS NOT NULL
+                        ORDER BY h2.NO DESC
+                        FETCH FIRST 1 ROW ONLY
+                    )
+                    ELSE COALESCE((
+                        SELECT TO_CHAR(h2.STATUS)
+                        FROM HISTORY h2
+                        WHERE h2.USERNO = h.USERNO
+                        AND h2.DATE_ = h.DATE_
+                        AND h2.NO < h.NO
+                        AND h2.STATUS IS NOT NULL
+                        AND h2.STARTHOUR IS NULL
+                        AND h2.ENDHOUR IS NULL
+                        ORDER BY h2.NO DESC
+                        FETCH FIRST 1 ROW ONLY
+                    ), '0')
+                END AS "OLD_VALUE"
             FROM HISTORY h
-            LEFT JOIN USERINFO u
-                ON INSTR(
-                    ',' || REPLACE(u.MailAddress, ' ', '') || ',',
-                    ',' || REPLACE(h.UDTUser, ' ', '') || ','
-                ) > 0
             WHERE h.REASON IS NOT NULL
             AND h.USERNO = :1
             AND h.DATE_ = :2
