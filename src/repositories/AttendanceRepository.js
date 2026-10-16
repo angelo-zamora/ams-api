@@ -189,15 +189,28 @@ class AttendanceRepository {
         const sql = `
             SELECT
                 DISTINCT h.*,
-                COALESCE((
-                    SELECT u.USERNAME
-                    FROM USERINFO u
-                    WHERE INSTR(
-                        ',' || REPLACE(u.MailAddress, ' ', '') || ',',
-                        ',' || REPLACE(h.UDTUser, ' ', '') || ','
-                    ) > 0
-                    AND ROWNUM = 1
-                ), '') AS "UDTUSERNAME",
+                COALESCE(
+                    (
+                        SELECT u.USERNAME
+                        FROM USERINFO u
+                        WHERE INSTR(
+                            ',' || REPLACE(u.MAILADDRESS, ' ', '') || ',',
+                            ',' || REPLACE(h.UDTUser, ' ', '') || ','
+                        ) > 0
+                        ORDER BY
+                            REGEXP_COUNT(
+                                REPLACE(NVL(u.MAILADDRESS, ''), ' ', ''),
+                                '[^,]+'
+                            ) ASC,
+                            INSTR(
+                                ',' || REPLACE(u.MAILADDRESS, ' ', '') || ',',
+                                ',' || REPLACE(h.UDTUser, ' ', '') || ','
+                            ) ASC,
+                            u.USERNO ASC
+                        FETCH FIRST 1 ROW ONLY
+                    ),
+                    ''
+                ) AS "UDTUSERNAME",
                 CASE
                     WHEN h.STARTHOUR IS NOT NULL THEN 'CLOCK_IN'
                     WHEN h.ENDHOUR IS NOT NULL THEN 'CLOCK_OUT'
