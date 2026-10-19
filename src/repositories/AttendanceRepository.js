@@ -232,7 +232,7 @@ class AttendanceRepository {
                         FROM HISTORY h2
                         WHERE h2.USERNO = h.USERNO
                         AND h2.DATE_ = h.DATE_
-                        AND h2.NO = h.NO
+                        AND h2.NO < h.NO
                         AND h2.ENDHOUR IS NOT NULL
                         ORDER BY h2.NO DESC
                         FETCH FIRST 1 ROW ONLY
@@ -248,7 +248,7 @@ class AttendanceRepository {
                         AND h2.ENDHOUR IS NULL
                         ORDER BY h2.NO DESC
                         FETCH FIRST 1 ROW ONLY
-                    ), '0')
+                    ), null)
                 END AS "OLD_VALUE"
             FROM HISTORY h
             WHERE h.REASON IS NOT NULL
