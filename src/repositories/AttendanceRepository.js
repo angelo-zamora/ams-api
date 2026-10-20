@@ -209,6 +209,23 @@ class AttendanceRepository {
                             u.USERNO ASC
                         FETCH FIRST 1 ROW ONLY
                     ),
+                    (
+                        SELECT u.USERNAME
+                        FROM USERINFO u
+                        WHERE INSTR(
+                            ',' || REPLACE(u.MAILADDRESS, ' ', '') || ',',
+                            ',' || TRIM(
+                                SUBSTR(h.UDTUser, 1, INSTR(h.UDTUser || ',', ',') - 1)
+                            ) || ','
+                        ) > 0
+                        ORDER BY
+                            REGEXP_COUNT(
+                                REPLACE(NVL(u.MAILADDRESS, ''), ' ', ''),
+                                '[^,]+'
+                            ) ASC,
+                            u.USERNO ASC
+                        FETCH FIRST 1 ROW ONLY
+                    ),
                     ''
                 ) AS "UDTUSERNAME",
                 CASE
