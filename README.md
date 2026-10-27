@@ -69,7 +69,8 @@ Functions/
 
 `local.settings.json.example` is the source of truth for the current environment configuration. Important groups include:
 
-- `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, and `AZURE_CLIENT_SECRET` for Entra ID and Microsoft Graph
+- `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, and `AZURE_CLIENT_SECRET` for the existing Entra ID and Microsoft Graph integration
+- `ALLOWED_TENANT_IDS` for customer Entra tenant IDs permitted to call the API. The existing `AZURE_TENANT_ID` is always allowed for backward compatibility.
 - `API_CLIENT_ID` for API token audience validation
 - `DB_*` and `DB_CONNECT_STRING` for the database
 - `ATTENDANCE_API_*` for the attendance API
@@ -84,6 +85,46 @@ Configure the app registration used by the API and Postman:
 1. Register the Postman callback URI `https://oauth.pstmn.io/v1/callback` under **Authentication**.
 2. Under **Expose an API**, configure the application ID URI and the API scope required by the Postman collection.
 3. Grant the required delegated permissions and admin consent.
+
+## Approving another Microsoft 365 tenant
+
+The app remains hosted by you and continues to use the shared database. A tenant ID allowlists a customer organization at the API boundary; it does not create employee records or grant manager permissions. Customer users must already have matching email addresses in `USERINFO`, and any manager access must continue to be represented by the existing `AUTHORITY` data.
+
+### One-time multi-tenant setup
+
+1. Configure the existing frontend and API app registrations to support work or school accounts from other Entra organizations. Keep the existing app IDs, API scope, application ID URI, and redirect URIs.
+2. Build the frontend with `VITE_AUTHORITY_TENANT=organizations`. Keep `VITE_FRONTEND_CLIENT_ID` and `VITE_API_SCOPE` set to the existing values. Configure this in the build environment used to produce the hosted app; do not put client secrets in frontend variables.
+3. Configure the API Function App with `ALLOWED_TENANT_IDS`. Use comma-separated tenant GUIDs, for example:
+
+   ```text
+   ALLOWED_TENANT_IDS=customer-tenant-guid-1,customer-tenant-guid-2
+   ```
+
+   The existing `AZURE_TENANT_ID` is added to the allowlist automatically, so it remains authorized even when the new setting only lists customers. For local work, set the same value in `local.settings.json` (never commit that file).
+4. Deploy the API and frontend. The API validates token signature, audience, issuer, and tenant ID; the client authority alone does not grant API access.
+
+### Per-customer approval procedure
+
+1. **Verify the customer tenant ID.** Ask the customer’s Entra administrator for the **Directory (tenant) ID** from the Microsoft Entra admin center under **Identity > Overview**. Confirm it is a GUID and that the administrator is acting for that tenant. The administrator can independently verify it with `az login --tenant <tenant-id>` followed by `az account show --query tenantId -o tsv`.
+2. **Check existing employee data.** Confirm the customer users’ sign-in email addresses match the email address used by the API’s existing `USERINFO` lookup. The current query checks the first comma-separated address in `MAILADDRESS`. No match means the API will not resolve an employee. Confirm any manager permissions are already correct in `AUTHORITY`.
+3. **Obtain customer admin consent.** Have the customer’s Entra administrator grant consent to the existing frontend/API delegated permission through your approved app-consent process. Confirm the permission is the API scope already used by the app; do not create a replacement API or broaden permissions for convenience.
+4. **Allow the app in Teams.** Have the customer’s Teams administrator upload or publish the built app ZIP and permit it under their Teams app-management policies. The ZIP references your hosted app; it does not contain the website, API, or database.
+5. **Add the verified tenant ID to the API allowlist.** In Azure Portal, open the Function App > **Settings > Environment variables** (or **Configuration**), update `ALLOWED_TENANT_IDS` with the customer GUID, save, and allow the app to restart. Keep previously approved customer IDs in the comma-separated value. Do not remove the existing `AZURE_TENANT_ID`.
+
+   Alternatively, from PowerShell with Azure CLI signed into the subscription that hosts the Function App:
+
+   ```powershell
+   az functionapp config appsettings set `
+     --resource-group "<resource-group>" `
+     --name "<function-app-name>" `
+     --settings "ALLOWED_TENANT_IDS=customer-tenant-guid-1,customer-tenant-guid-2"
+   ```
+
+   Replace the example value with the **complete list of approved customer tenant IDs**, not just the newly added ID, so existing customer approvals are retained.
+
+6. **Test and record approval.** Have a mapped customer user sign in through Teams and call a profile/attendance endpoint. Confirm the user gets only their own and already-authorized manager data. A user from an unapproved tenant should receive HTTP 403; invalid or expired tokens should receive HTTP 401. Record the tenant GUID, approving administrator, consent date, and test result in your operational onboarding records.
+
+To revoke a tenant, remove its GUID from `ALLOWED_TENANT_IDS`, save/restart the Function App, and confirm API calls from that tenant receive HTTP 403. This does not delete or alter any employee data in the shared database.
 
 ## Running Locally
 
