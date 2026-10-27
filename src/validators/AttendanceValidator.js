@@ -3,7 +3,7 @@ const localeHelper = require("../helpers/LocaleHelper");
 /**
  * ============================================
  * Attendance Validator
- * ½Ð¶Ð´ÉÍý¥Ð¥ê¥Ç¡¼¥¿¡¼
+ * ï¿½Ð¶Ð´ï¿½ï¿½ï¿½ï¿½Ð¥ï¿½Ç¡ï¿½ï¿½ï¿½ï¿½ï¿½
  * Author: CRESS-INFO Angelo
  * Date: 2026/07/14
  * ============================================
@@ -33,6 +33,20 @@ class AttendanceValidator {
     validateTodayAttendance(attendance) {
         if (!attendance) {
             throw new Error("NO_CLOCK_IN_FOUND");
+        }
+    }
+
+    validateMonthlyAttendanceRequest(params) {
+        if (!params?.year || !params?.month) {
+            throw new Error("YEAR_AND_MONTH_REQUIRED");
+        }
+
+        if (!/^\d{4}$/.test(String(params.year))) {
+            throw new Error("INVALID_YEAR_FORMAT");
+        }
+
+        if (!/^\d{2}$/.test(String(params.month))) {
+            throw new Error("INVALID_MONTH_FORMAT");
         }
     }
 }

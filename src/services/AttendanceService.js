@@ -10,7 +10,7 @@ const leaveValidator = require("../validators/LeaveValidator");
 /**
  * ============================================
  * Attendance Service
- * ½Ð¶Ð´ÉÍý¥µ¡¼¥Ó¥¹
+ * ï¿½Ð¶Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¥ï¿½
  * Author: CRESS-INFO Angelo
  * Date: 2026/07/14
  * ============================================
@@ -99,7 +99,7 @@ class AttendanceService {
 
     /**
      * Get employee overtime request
-     * ½¾¶È°÷¤Î»Ä¶È¿½ÀÁ¤ò¼èÆÀ¤¹¤ë¡£
+     * ï¿½ï¿½ï¿½È°ï¿½ï¿½Î»Ä¶È¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¡£
      */
     async getLeaveRequest(session, request, locale) {
         const email = session.currentUser.email;
@@ -123,6 +123,30 @@ class AttendanceService {
         leaveValidator.validateGetLeaveRequest(leave);
 
         return leave;
+    }
+
+    async getMonthlyAttendance(session, params, locale) {
+        const email = session.currentUser.email;
+        const employee = await employeeService.validateEmployee(email, locale);
+
+        validator.validateMonthlyAttendanceRequest(params);
+
+        const targetAccountId = params?.accountId
+            ? params.accountId
+            : employee.USERNO;
+
+        const monthlyData = await attendanceApiService.getMonthlyAttendance(
+            employee,
+            targetAccountId,
+            params.year,
+            params.month
+        );
+
+        if (!monthlyData || !monthlyData.accounts) {
+            throw new Error("NO_MONTHLY_ATTENDANCE_FOUND");
+        }
+
+        return monthlyData;
     }
 
     /**
