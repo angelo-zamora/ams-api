@@ -1,7 +1,7 @@
 /**
  * ============================================
  * Locale Helper
- * Â¿¸À¸ì¥Ø¥ë¥Ñ¡¼
+ * Â¿ï¿½ï¿½ï¿½ï¿½Ø¥ï¿½Ñ¡ï¿½
  * ============================================
  */
 class LocaleHelper {
@@ -27,27 +27,33 @@ class LocaleHelper {
                 OVERTIME_COMPLETED: "Overtime Request completed.",
                 OVERTIME_NOT_FOUND: "Overtime not found.",
                 LEAVE_REQUEST_NOT_FOUND: "Leave Request not found.",
-                LEAVE_COMPLETED: "Leave Request completed."
+                LEAVE_COMPLETED: "Leave Request completed.",
+                NO_EDIT_HISTORY: "No edit history found",
+                INVALID_PARAMETERS: "Invalid parameters provided.",
+                SUCCESS: "Request completed successfully."
             },
             ja: {
-                CLOCK_IN_COMPLETED: "ÂÇ¹ï¤¬´°Î»¤·¤Þ¤·¤¿¡£",
-                CLOCK_OUT_COMPLETED: "Âà¶Ð¤¬´°Î»¤·¤Þ¤·¤¿¡£",
-                ALREADY_CLOCKED_IN_TODAY: "¤¹¤Ç¤Ë½Ð¶ÐºÑ¤ß¤Ç¤¹¡£",
-                ALREADY_CLOCKED_IN: "¤¹¤Ç¤Ë½Ð¶ÐºÑ¤ß¤Ç¤¹¡£",
-                ALREADY_CLOCKED_OUT: "¤¹¤Ç¤ËÂà¶ÐºÑ¤ß¤Ç¤¹¡£",
-                NO_CLOCK_IN_FOUND: "½Ð¶Ðµ­Ï¿¤¬¸«¤Ä¤«¤ê¤Þ¤»¤ó¡£",
-                CLOCK_IN_RECORD_NOT_FOUND: "½Ð¶Ðµ­Ï¿¤¬¸«¤Ä¤«¤ê¤Þ¤»¤ó¡£",
-                EMPLOYEE_NOT_FOUND: "½¾¶È°÷¤¬¸«¤Ä¤«¤ê¤Þ¤»¤ó¡£",
-                CLOCK_IN_FAILED: "ÂÇ¹ï¤Ë¼ºÇÔ¤·¤Þ¤·¤¿¡£",
-                MISSING_AUTHORIZATION_HEADER: "Ç§¾Ú¥Ø¥Ã¥À¡¼¤¬¤¢¤ê¤Þ¤»¤ó",
-                INVALID_AUTHORIZATION_HEADER: "Ç§¾Ú¥Ø¥Ã¥À¡¼¤¬Ìµ¸ú¤Ç¤¹",
-                UNAUTHORIZED: "Ç§¾Ú¤¬É¬Í×¤Ç¤¹",
-                SERVER_ERROR: "¥µ¡¼¥Ð¡¼¥¨¥é¡¼¤¬È¯À¸¤·¤Þ¤·¤¿",
-                ALREADY_OVERTIME_REQ_TODAY: "¤¹¤Ç¤Ë»Ä¶È¿½ÀÁºÑ¤ß¤Ç¤¹¡£",
-                OVERTIME_COMPLETED: "»Ä¶È¿½ÀÁ¤¬´°Î»¤·¤Þ¤·¤¿¡£",
-                OVERTIME_NOT_FOUND: "»Ä¶È¿½ÀÁ¤¬¸«¤Ä¤«¤ê¤Þ¤»¤ó¡£",
-                LEAVE_REQUEST_NOT_FOUND: "µÙ²Ë¿½ÀÁ¤¬¸«¤Ä¤«¤ê¤Þ¤»¤ó¡£",
-                LEAVE_COMPLETED: "µÙ²Ë¿½ÀÁ¤¬´°Î»¤·¤Þ¤·¤¿¡£"
+                CLOCK_IN_COMPLETED: "ï¿½Ç¹ï¤¬ï¿½ï¿½Î»ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½ï¿½ï¿½",
+                CLOCK_OUT_COMPLETED: "ï¿½ï¿½Ð¤ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½ï¿½ï¿½",
+                ALREADY_CLOCKED_IN_TODAY: "ï¿½ï¿½ï¿½Ç¤Ë½Ð¶ÐºÑ¤ß¤Ç¤ï¿½ï¿½ï¿½",
+                ALREADY_CLOCKED_IN: "ï¿½ï¿½ï¿½Ç¤Ë½Ð¶ÐºÑ¤ß¤Ç¤ï¿½ï¿½ï¿½",
+                ALREADY_CLOCKED_OUT: "ï¿½ï¿½ï¿½Ç¤ï¿½ï¿½ï¿½ÐºÑ¤ß¤Ç¤ï¿½ï¿½ï¿½",
+                NO_CLOCK_IN_FOUND: "ï¿½Ð¶Ðµï¿½Ï¿ï¿½ï¿½ï¿½ï¿½ï¿½Ä¤ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½",
+                CLOCK_IN_RECORD_NOT_FOUND: "ï¿½Ð¶Ðµï¿½Ï¿ï¿½ï¿½ï¿½ï¿½ï¿½Ä¤ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½",
+                EMPLOYEE_NOT_FOUND: "ï¿½ï¿½ï¿½È°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¤ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½",
+                CLOCK_IN_FAILED: "ï¿½Ç¹ï¿½Ë¼ï¿½ï¿½Ô¤ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½ï¿½ï¿½",
+                MISSING_AUTHORIZATION_HEADER: "Ç§ï¿½Ú¥Ø¥Ã¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½",
+                INVALID_AUTHORIZATION_HEADER: "Ç§ï¿½Ú¥Ø¥Ã¥ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½ï¿½ï¿½Ç¤ï¿½",
+                UNAUTHORIZED: "Ç§ï¿½Ú¤ï¿½É¬ï¿½×¤Ç¤ï¿½",
+                SERVER_ERROR: "ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½é¡¼ï¿½ï¿½È¯ï¿½ï¿½ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½",
+                ALREADY_OVERTIME_REQ_TODAY: "ï¿½ï¿½ï¿½Ç¤Ë»Ä¶È¿ï¿½ï¿½ï¿½ï¿½Ñ¤ß¤Ç¤ï¿½ï¿½ï¿½",
+                OVERTIME_COMPLETED: "ï¿½Ä¶È¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½ï¿½ï¿½",
+                OVERTIME_NOT_FOUND: "ï¿½Ä¶È¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¤ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½",
+                LEAVE_REQUEST_NOT_FOUND: "ï¿½Ù²Ë¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¤ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½",
+                LEAVE_COMPLETED: "ï¿½Ù²Ë¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½ï¿½ï¿½",
+                NO_EDIT_HISTORY: "Ò¡ß¼Ä½ËµÆ¤Â¬Ä¤ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½",
+                INVALID_PARAMETERS: "ÌµÂ¸Ê¸Â¤Ê¥Ñ¥ï¿½á¥¿Â¤Â¬Ã¤Â¡Â¤Þ¤Â¤Â¤Â¿",
+                SUCCESS: "Â¥ÃªÂ¥Â¯Â¥Â¨Â¥Â¹Â¥ÃˆÂ¤Â¬Ã€Ç¸Â¤Ã‹ÃŠÂ®Î»Â¤Â·Â¤ÃžÂ¤Â·Â¤Â¿"
             }
         };
     }

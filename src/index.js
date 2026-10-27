@@ -13,6 +13,7 @@ require("./functions/NoClockInReminder");
 require("./functions/NoClockOutReminder");
 require("./functions/ClockInReminder");
 require("./functions/Leave");
+require("./functions/User");
 
 app.setup({
     enableHttpStream: true,

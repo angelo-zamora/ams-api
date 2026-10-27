@@ -160,6 +160,131 @@ class AttendanceService {
             (hour === constants.LATE_CLOCK_IN.HOUR &&
                 minute >= constants.LATE_CLOCK_IN.MINUTE);
     }
+
+    /**
+     * Get attendance edit history
+     * @param {Object} session - The session object containing user information
+     * @param {Object} params - Parameters containing userNo and date (YYYYMMDD)
+     * @param {string} locale - The locale for response messages
+     * @returns {Promise<Array>} - Array of edit history records with date field
+     */
+    async getEditHistory(session, params, locale) {
+        const email = session.currentUser.email;
+        const employee = await employeeService.validateEmployee(email, locale);
+
+        const { userNo, date } = params;
+
+        const rows = await attendanceRepository.getEditHistory(userNo, date);
+
+        if (!rows || rows.length === 0) {
+            return null;
+        }
+
+        // Process all records
+        return rows.map(row => {
+            // Format clockin and clockout times
+            const clockin = row.STARTHOUR && row.STARTMIN 
+                ? `${String(row.STARTHOUR).padStart(2, '0')}:${String(row.STARTMIN).padStart(2, '0')}`
+                : null;
+
+            const clockout = row.ENDHOUR && row.ENDMIN 
+                ? `${String(row.ENDHOUR).padStart(2, '0')}:${String(row.ENDMIN).padStart(2, '0')}`
+                : null;
+
+            // Parse UDTDATE (YYYYMMDDHHMMSS format) to get HH:MM for updateTime
+            let updateTime = null;
+            if (row.UDTDATE && row.UDTDATE.length >= 14) {
+                const hour = row.UDTDATE.substring(8, 10);
+                const minute = row.UDTDATE.substring(10, 12);
+                updateTime = `${hour}:${minute}`;
+            }
+
+            // Extract YYYYMMDD part of UDTDATE
+            let udtDate = null;
+            if (row.UDTDATE && row.UDTDATE.length >= 8) {
+                udtDate = row.UDTDATE.substring(0, 8);
+            }
+
+            return {
+                id: row.NO,
+                date: row.DATE_,
+                userno: row.USERNO,
+                clockin,
+                clockout,
+                reason: row.REASON,
+                updatedBy: row.UDTUSERNAME,
+                status: row.STATUS,
+                changeType: row.CHANGE_TYPE,
+                oldValue: row.OLD_VALUE,
+                updateTime,
+                udtDate
+            };
+        });
+    }
+    async getFlex(session, params, locale) {
+        const sessionEmail = session.currentUser.email;
+        const employee = await employeeService.validateEmployee(sessionEmail, locale);
+
+        const targetUserNo = params?.userNo ? params.userNo : employee.USERNO;
+        const targetEmail = params?.email ? params.email : sessionEmail;
+
+        const flexData = await attendanceApiService.getFlex(
+            employee,
+            targetUserNo,
+            targetEmail,
+            params.workMonth,
+            params.workYear
+        );
+
+        if (!flexData) {
+            throw new Error("NO_FLEX_FOUND");
+        }
+
+        return flexData;
+    }
+
+    async sendTime(session, payload, locale) {
+        const sessionEmail = session.currentUser.email;
+        const employee = await employeeService.validateEmployee(sessionEmail, locale);
+
+        // If userNo is not provided in payload, default to logged-in user's USERNO
+        const targetUserNo = payload?.userNo ? payload.userNo : employee.USERNO;
+
+        const editData = await attendanceApiService.sendTime(
+            employee,
+            targetUserNo,
+            payload
+        );
+
+        if (!editData) {
+            throw new Error("EDIT_TIME_FAILED");
+        }
+
+        return editData;
+    }
+
+    /**
+     * Edit or send Leave request with optional userNo
+     */
+    async editLeave(session, payload, locale) {
+        const sessionEmail = session.currentUser.email;
+        const employee = await employeeService.validateEmployee(sessionEmail, locale);
+
+        // If userNo is not provided in payload, default to logged-in user's USERNO
+        const targetUserNo = payload?.userNo ? payload.userNo : employee.USERNO;
+
+        const editData = await attendanceApiService.editLeave(
+            employee,
+            targetUserNo,
+            payload
+        );
+
+        if (!editData) {
+            throw new Error("EDIT_LEAVE_FAILED");
+        }
+
+        return editData;
+    }
 }
 
 module.exports = new AttendanceService();

@@ -14,7 +14,7 @@ const client = jwksClient({
 /**
  * ============================================
  * JWT Validator
- * JWT ǧ�ڥߥɥ륦����
+ * JWT ǧ�ڥߥɥ륦����
  * Author: CRESS-INFO Angelo
  * Date: 2026/07/21
  * ============================================
@@ -80,7 +80,8 @@ class JwtValidator {
 
                     audience: [
                         process.env.API_CLIENT_ID,
-                        `api://${process.env.API_CLIENT_ID}`
+                        `api://${process.env.API_CLIENT_ID}`,
+                        'api://stp.onmicrosoft.com'
                     ],
 
                     issuer: [

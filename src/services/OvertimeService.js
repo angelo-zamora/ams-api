@@ -6,7 +6,7 @@ const validator = require("../validators/OvertimeValidator");
 /**
  * ============================================
  * Overtime Service
- * ³°½Ð¥µ¡¼¥Ó¥¹
+ * ï¿½ï¿½ï¿½Ð¥ï¿½ï¿½ï¿½ï¿½Ó¥ï¿½
  * Author: CRESS-INFO Angelo
  * Date: 2026/07/21
  * ============================================
@@ -15,7 +15,7 @@ class OvertimeService {
 
     /**
      * Save Overtime request
-     * »Ä¶È¿½ÀÁ¤òµ­Ï¿¤¹¤ë¡£
+     * ï¿½Ä¶È¿ï¿½ï¿½ï¿½ï¿½ï¿½Ï¿ï¿½ï¿½ï¿½ë¡£
      */
     async save(payload, session, locale) {
 
@@ -36,7 +36,7 @@ class OvertimeService {
 
     /**
      * Get employee overtime request
-     * ½¾¶È°÷¤Î»Ä¶È¿½ÀÁ¤ò¼èÆÀ¤¹¤ë¡£
+     * ï¿½ï¿½ï¿½È°ï¿½ï¿½Î»Ä¶È¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¡£
      */
     async getOvertime(session, request, locale) {
         const email = session.currentUser.email;
@@ -48,6 +48,25 @@ class OvertimeService {
         validator.validateTodayOvertime(overtime);
 
         return overtime;
+    }
+
+    /**
+     * Edit or send Overtime request with optional userNo
+     */
+    async editOt(session, payload, locale) {
+        const email = session.currentUser.email;
+        const employee = await employeeService.validateEmployee(email, locale);
+
+        // If userNo is not provided in payload, default to logged-in user's USERNO
+        const targetUserNo = payload?.userNo ? payload.userNo : employee.USERNO;
+
+        const editData = await overtimeApiService.editOt(
+            employee,
+            targetUserNo,
+            payload
+        );
+
+        return editData;
     }
 
 }

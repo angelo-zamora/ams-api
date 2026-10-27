@@ -5,7 +5,7 @@ const config = require("../config/AppConfig");
 /**
  * ============================================
  * Attendance Repository
- * ½Ð¶Ð´ÉÍý¥ê¥Ý¥¸¥È¥ê
+ * ï¿½Ð¶Ð´ï¿½ï¿½ï¿½ï¿½ï¿½Ý¥ï¿½ï¿½È¥ï¿½
  * Author: CRESS-INFO Angelo
  * Date: 2026/07/14
  * ============================================
@@ -70,7 +70,7 @@ class AttendanceRepository {
 
     /**
      * Get users who have not clocked in today
-     * Ì¤½Ð¶Ð¼Ô¤ò¼èÆÀ¤¹¤ë¡£
+     * Ì¤ï¿½Ð¶Ð¼Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¡£
      */
     async getNoClockInUsers()
     {
@@ -100,7 +100,7 @@ class AttendanceRepository {
 
     /**
      * Get users who have not clocked out today
-     * Ì¤Âà¶Ð¼Ô¤ò¼èÆÀ¤¹¤ë¡£
+     * Ì¤ï¿½ï¿½Ð¼Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¡£
      */
     async getStillNoClockOutUsers()
     {
@@ -126,7 +126,7 @@ class AttendanceRepository {
 
     /**
      * Get users who have not clocked in today
-     * Ì¤½Ð¶Ð¼Ô¤ò¼èÆÀ¤¹¤ë¡£
+     * Ì¤ï¿½Ð¶Ð¼Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¡£
      */
     async getNoClockInUsersToday()
     {
@@ -156,7 +156,7 @@ class AttendanceRepository {
 
     /**
      * Get employee leave request
-     * ½¾¶È°÷¤ÎµÙ²Ë¿½ÀÁ¤ò¼èÆÀ¤¹¤ë¡£
+     * ï¿½ï¿½ï¿½È°ï¿½ï¿½ÎµÙ²Ë¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¡£
      * @param {string} userNo - The employee's user number.
      * @param {string} date - The date of the leave request in 'YYYYMMDD' format.
      * @returns {Promise<TimeManage|null>} - The leave request if found, otherwise null.
@@ -177,6 +177,109 @@ class AttendanceRepository {
         const rows = Array.isArray(result) ? result[0] : result.rows || [];
 
         return rows.length ? TimeManage.fromDbRow(rows[0]) : null;
+    }
+
+    /**
+     * Get attendance edit history by specific date
+     * @param {string} userNo - The employee's user number.
+     * @param {string} date - The date in 'YYYYMMDD' format.
+     * @returns {Promise<Array>} - The edit history records
+     */
+    async getEditHistory(userNo, date) {
+        const sql = `
+            SELECT
+                DISTINCT h.*,
+                COALESCE(
+                    (
+                        SELECT u.USERNAME
+                        FROM USERINFO u
+                        WHERE INSTR(
+                            ',' || REPLACE(u.MAILADDRESS, ' ', '') || ',',
+                            ',' || REPLACE(h.UDTUser, ' ', '') || ','
+                        ) > 0
+                        ORDER BY
+                            REGEXP_COUNT(
+                                REPLACE(NVL(u.MAILADDRESS, ''), ' ', ''),
+                                '[^,]+'
+                            ) ASC,
+                            INSTR(
+                                ',' || REPLACE(u.MAILADDRESS, ' ', '') || ',',
+                                ',' || REPLACE(h.UDTUser, ' ', '') || ','
+                            ) ASC,
+                            u.USERNO ASC
+                        FETCH FIRST 1 ROW ONLY
+                    ),
+                    (
+                        SELECT u.USERNAME
+                        FROM USERINFO u
+                        WHERE INSTR(
+                            ',' || REPLACE(u.MAILADDRESS, ' ', '') || ',',
+                            ',' || TRIM(
+                                SUBSTR(h.UDTUser, 1, INSTR(h.UDTUser || ',', ',') - 1)
+                            ) || ','
+                        ) > 0
+                        ORDER BY
+                            REGEXP_COUNT(
+                                REPLACE(NVL(u.MAILADDRESS, ''), ' ', ''),
+                                '[^,]+'
+                            ) ASC,
+                            u.USERNO ASC
+                        FETCH FIRST 1 ROW ONLY
+                    ),
+                    ''
+                ) AS "UDTUSERNAME",
+                CASE
+                    WHEN h.STARTHOUR IS NOT NULL THEN 'CLOCK_IN'
+                    WHEN h.ENDHOUR IS NOT NULL THEN 'CLOCK_OUT'
+                    ELSE 'LEAVE'
+                END AS "CHANGE_TYPE",
+                CASE
+                    WHEN h.STARTHOUR IS NOT NULL THEN (
+                        SELECT h2.STARTHOUR || ':' || h2.STARTMIN
+                        FROM HISTORY h2
+                        WHERE h2.USERNO = h.USERNO
+                        AND h2.DATE_ = h.DATE_
+                        AND h2.NO < h.NO
+                        AND h2.STARTHOUR IS NOT NULL
+                        ORDER BY h2.NO DESC
+                        FETCH FIRST 1 ROW ONLY
+                    )
+                    WHEN h.ENDHOUR IS NOT NULL THEN (
+                        SELECT h2.ENDHOUR || ':' || h2.ENDMIN
+                        FROM HISTORY h2
+                        WHERE h2.USERNO = h.USERNO
+                        AND h2.DATE_ = h.DATE_
+                        AND h2.NO < h.NO
+                        AND h2.ENDHOUR IS NOT NULL
+                        ORDER BY h2.NO DESC
+                        FETCH FIRST 1 ROW ONLY
+                    )
+                    ELSE COALESCE((
+                        SELECT TO_CHAR(h2.STATUS)
+                        FROM HISTORY h2
+                        WHERE h2.USERNO = h.USERNO
+                        AND h2.DATE_ = h.DATE_
+                        AND h2.NO < h.NO
+                        AND h2.STATUS IS NOT NULL
+                        AND h2.STARTHOUR IS NULL
+                        AND h2.ENDHOUR IS NULL
+                        ORDER BY h2.NO DESC
+                        FETCH FIRST 1 ROW ONLY
+                    ), null)
+                END AS "OLD_VALUE"
+            FROM HISTORY h
+            WHERE h.REASON IS NOT NULL
+            AND h.USERNO = :1
+            AND h.DATE_ = :2
+            ORDER BY h.DATE_ DESC, h.UDTDATE DESC
+        `;
+
+        const result = await db.getConnection().execute(sql, [
+            userNo, date
+        ]);
+        const rows = Array.isArray(result) ? result[0] : result.rows || [];
+
+        return rows;
     }
 }
 

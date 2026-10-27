@@ -4,6 +4,7 @@ const ClockOutResponse = require("../dto/ClockOutResponse");
 const LeaveResponse = require("../dto/LeaveResponse");
 const AttendanceTodayResponse = require("../dto/AttendanceTodayResponse");
 const MonthlyAttendanceResponse = require("../dto/MonthlyAttendanceResponse");
+const EditHistoryResponse = require("../dto/EditHistoryResponse");
 const constants = require("../helpers/Constants");
 
 /**
@@ -83,6 +84,65 @@ class AttendanceController {
         );
 
         return new MonthlyAttendanceResponse(monthlyAttendance, locale);
+    }
+    async getEditHistory(session, params, locale) {
+        const editHistory = await attendanceService.getEditHistory(session, params, locale);
+
+        return new EditHistoryResponse(editHistory);
+    }
+
+    /**
+     * Get flex attendance information.
+     * フレックス勤怠情報を取得する。
+     * @param {Object} session - The session object containing user information.
+     * @param {Object} params - Query parameters (userNo, email, workMonth, workYear).
+     * @param {string} locale - The locale for response messages.
+     * @returns {Promise<Object>} - The flex attendance response data.
+     */
+    async getFlex(session, params, locale) {
+        const flexData = await attendanceService.getFlex(
+            session,
+            params,
+            locale
+        );
+
+        return flexData;
+    }
+
+    /**
+     * Send or edit attendance time.
+     * 勤怠時間の編集・送信を行う。
+     * @param {Object} session - The session object containing user information.
+     * @param {Object} payload - The payload containing edit time parameters.
+     * @param {string} locale - The locale for response messages.
+     * @returns {Promise<Object>} - The response data from the edit time action.
+     */
+    async sendTime(session, payload, locale) {
+        const result = await attendanceService.sendTime(
+            session,
+            payload,
+            locale
+        );
+
+        return result;
+    }
+    
+    /**
+     * Edit or send leave request with optional userNo.
+     * 休暇申請・編集を行う。
+     * @param {Object} session - The session object containing user information.
+     * @param {Object} payload - The payload containing leave edit parameters.
+     * @param {string} locale - The locale for response messages.
+     * @returns {Promise<Object>} - The response data from the leave action.
+     */
+    async editLeave(session, payload, locale) {
+        const result = await attendanceService.editLeave(
+            session,
+            payload,
+            locale
+        );
+
+        return result;
     }
 }
 

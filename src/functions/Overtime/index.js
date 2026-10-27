@@ -1,5 +1,6 @@
 const { app } = require("@azure/functions");
 const auth = require("../../middleware/AuthenticationMiddleware");
+const cors = require("../../middleware/CorsMiddleware");
 const overtime = require("../../controllers/OvertimeController");
 const response = require("../../helpers/ResponseHelper");
 
@@ -66,4 +67,42 @@ app.http("getOvertime", {
 
     }
 
+});
+
+app.http("PostEditOt", {
+    methods: ["POST", "OPTIONS"],
+    authLevel: "anonymous",
+    handler: async (request, context) => {
+
+        const preflightResponse = cors.handlePreflight(request);
+        if (preflightResponse) return preflightResponse;
+
+        try {
+            const locale = request.headers.get("x-locale") || request.headers.get("x-language") || "en";
+            const session = await auth.authenticate(request);
+
+            const payload = await request.json();
+
+            const result = await overtime.editOt(
+                session,
+                payload,
+                locale
+            );
+
+            return response.successWithCors(result, locale, request);
+
+        } catch (error) {
+            context.error(error);
+
+            if (error?.message === "VALIDATION_FAILED") {
+                return response.badRequestWithCors("VALIDATION_FAILED", request, error);
+            }
+
+            if (error?.message === "ALREADY_OVERTIME_REQ_TODAY") {
+                return response.conflictWithCors("ALREADY_OVERTIME_REQ_TODAY", request);
+            }
+
+            return response.serverErrorWithCors(error, request.headers.get("x-locale") || "en", request);
+        }
+    }
 });
