@@ -137,6 +137,19 @@ class ResponseHelper {
     }
 
     serverError(error, locale) {
+        if (error?.statusCode === 401 || error?.statusCode === 403) {
+            const resolvedLocale = localeHelper.resolveLocale(locale);
+            const code = error.statusCode === 403 ? "FORBIDDEN" : "UNAUTHORIZED";
+            return {
+                status: error.statusCode,
+                jsonBody: {
+                    success: false,
+                    code,
+                    message: localeHelper.translate(code, resolvedLocale)
+                }
+            };
+        }
+
         const resolvedLocale = localeHelper.resolveLocale(locale);
         const rawMessage = typeof error?.message === "string" ? error.message : "SERVER_ERROR";
         const messageKey = rawMessage.toUpperCase();
@@ -153,6 +166,20 @@ class ResponseHelper {
     }
 
     serverErrorWithCors(error, locale, request) {
+        if (error?.statusCode === 401 || error?.statusCode === 403) {
+            const resolvedLocale = localeHelper.resolveLocale(locale);
+            const code = error.statusCode === 403 ? "FORBIDDEN" : "UNAUTHORIZED";
+            return {
+                status: error.statusCode,
+                headers: this.getCorsHeaders(request),
+                jsonBody: {
+                    success: false,
+                    code,
+                    message: localeHelper.translate(code, resolvedLocale)
+                }
+            };
+        }
+
         const resolvedLocale = localeHelper.resolveLocale(locale);
         const rawMessage = typeof error?.message === "string" ? error.message : "SERVER_ERROR";
         const messageKey = rawMessage.toUpperCase();

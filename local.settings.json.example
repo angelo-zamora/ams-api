@@ -3,6 +3,7 @@
     "Values": {
         "AzureWebJobsStorage": "",
         "AZURE_TENANT_ID": "",
+        "ALLOWED_TENANT_IDS": "",
         "AZURE_CLIENT_ID": "",
         "API_CLIENT_ID": "",
         "AZURE_CLIENT_SECRET": "",
