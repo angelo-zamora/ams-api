@@ -43,21 +43,21 @@ module.exports = {
         NO_CLOCK_IN_REMINDER: "**⏳️ まもなくシフト開始時間です**<br/><br/>勤務開始まであと1分ですが、まだ出勤打刻がされていません。勤怠カードから出勤打刻を行ってください。"
     },
     // 5:00 PM Philippine Time (Monday-Friday)
-    CLOCK_OUT_REMINDER: "0 0 9 * * 1-5",
+    CLOCK_OUT_REMINDER: "0 0 8 * * 1-5",
 
     // Every 5 minutes from 5:00 PM to 11:55 PM Philippine Time
-    OVERTIME_REMINDER: "0 */5 9-15 * * 1-5",
+    OVERTIME_REMINDER: "0 */5 8-14 * * 1-5",
 
     // 11:59 PM Monday-Friday (PHT)
-    NO_CLOCK_OUT_REMINDER: "0 59 15 * * 1-5",
+    NO_CLOCK_OUT_REMINDER: "0 59 14 * * 1-5",
 
     // 7:30 AM PHT Monday-Friday
-    CLOCK_IN_REMINDER: "0 30 23 * * 0-4",
+    CLOCK_IN_REMINDER: "0 30 22 * * 0-4",
 
     // 7:59 AM Philippine Time Monday-Friday
     // In UTC this is 11:59 PM on the previous day,
     // so Sunday-Thursday UTC corresponds to Monday-Friday PHT.
-    NO_CLOCK_IN_REMINDER: "0 59 23 * * 0-4",
+    NO_CLOCK_IN_REMINDER: "0 59 22 * * 0-4",
 
     LEAVE_STATUSES: {
         CANCELLED: "0",                // 取消
